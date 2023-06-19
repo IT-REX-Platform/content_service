@@ -1,0 +1,37 @@
+"""
+Represents a user's progress on a content item.
+See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.htm
+"""
+type ProgressData {
+    userId: UUID!
+    contentId: UUID!
+    """
+    The date the user completed the content item.
+    """
+    date: DateTime!
+    """
+    Whether the user completed the content item successfully.
+    """
+    success: Boolean!
+    """
+    Value between 0 and 1 representing the user's correctness on the content item.
+    """
+    correctness: Float!
+    """
+    Whether the user used a hint to complete the content item.
+    """
+    hintUsed: Boolean!
+    """
+    Time in milliseconds it took the user to complete the content item.
+    """
+    timeToComplete: Int!
+    """
+    The learning interval in milliseconds for the content item.
+    """
+    learningInterval: Int!
+}
+
+type ProgressDataPayload {
+    elements: [ProgressData!]!
+    pageInfo: PaginationInfo!
+}
