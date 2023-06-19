@@ -8,13 +8,12 @@ interface Content {
     Metadata of the content
     """
     metadata: ContentMetadata!
-
     """
     Progress data of the content, specific to given users.
-    If userIds is not provided, the progress data of the current user is returned.
+    If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userIds: [UUID!]): ProgressDataPayload!
+    userProgressData(userId: UUID): ProgressData!
 }
 
 type ContentMetadata {
@@ -54,10 +53,10 @@ type MediaContent implements Content {
 
     """
     Progress data of the content, specific to given users.
-    If userIds is not provided, the progress data of the current user is returned.
+    If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userIds: [UUID!]): ProgressDataPayload!
+    userProgressData(userId: UUID): ProgressData!
 }
 
 interface Assessment implements Content {
@@ -76,13 +75,12 @@ interface Assessment implements Content {
     Metadata of the content
     """
     metadata: ContentMetadata!
-
     """
     Progress data of the content, specific to given users.
-    If userIds is not provided, the progress data of the current user is returned.
+    If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userIds: [UUID!]): ProgressDataPayload!
+    userProgressData(userId: UUID): ProgressData!
 }
 
 type AssessmentMetadata {
@@ -116,10 +114,10 @@ type FlashcardSetAssessment implements Assessment & Content {
 
     """
     Progress data of the content, specific to given users.
-    If userIds is not provided, the progress data of the current user is returned.
+    If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userIds: [UUID!]): ProgressDataPayload!
+    userProgressData(userId: UUID): ProgressData!
 }
 
 # add more types here
