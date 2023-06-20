@@ -30,7 +30,7 @@ public class ContentController {
     }
 
     @QueryMapping
-    List<ContentPayload> contentsByChapterIds(@Argument List<UUID> chapterIds) {
+    List<List<Content>> contentsByChapterIds(@Argument List<UUID> chapterIds) {
         return contentService.getContentsByChapterIds(chapterIds);
     }
 

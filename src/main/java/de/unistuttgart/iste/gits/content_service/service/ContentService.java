@@ -59,7 +59,7 @@ public class ContentService {
                 .toList());
     }
 
-    public List<ContentPayload> getContentsByChapterIds(List<UUID> chapterIds) {
+    public List<List<Content>> getContentsByChapterIds(List<UUID> chapterIds) {
         List<List<Content>> result = new ArrayList<>(chapterIds.size());
 
         // get a list containing all contents with a matching chapter id, then map them by chapter id (multiple
@@ -76,7 +76,7 @@ public class ContentService {
             result.add(contents);
         }
 
-        return result.stream().map(this::createContentPayload).toList();
+        return result;
     }
 
     private ContentPayload createContentPayload(List<Content> contents) {

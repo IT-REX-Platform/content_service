@@ -42,11 +42,9 @@ class QueryByChapterIdTest {
         String query = """
                 query($chapterIds: [UUID!]!) {
                     contentsByChapterIds(chapterIds: $chapterIds) {
-                        elements {
-                            id
-                            metadata {
-                                chapterId
-                            }
+                        id
+                        metadata {
+                            chapterId
                         }
                     }
                 }
@@ -55,7 +53,7 @@ class QueryByChapterIdTest {
         graphQlTester.document(query)
                 .variable("chapterIds", chapterIds.subList(0, 3))
                 .execute()
-                .path("contentsByChapterIds[*].elements[*].metadata.chapterId")
+                .path("contentsByChapterIds[*][*].metadata.chapterId")
                 .entityList(UUID.class)
                 .containsExactly(chapterIds.get(0), chapterIds.get(1), chapterIds.get(2));
     }
