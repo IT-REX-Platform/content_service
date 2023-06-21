@@ -3,7 +3,13 @@ Represents a user's progress on a content item.
 See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
 """
 type ProgressData {
+    """
+    The user's id.
+    """
     userId: UUID!
+    """
+    The id of the content item.
+    """
     contentId: UUID!
     """
     A list of entries each representing the user completing the content item.
