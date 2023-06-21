@@ -7,15 +7,17 @@ type ProgressData {
     contentId: UUID!
     """
     A list of entries each representing the user completing the content item.
+    Sorted by date in descending order.
     """
-    log: ProgressLogPayload!
+    log: [ProgressLogItem]!
     """
-    The learning interval in milliseconds for the content item.
+    The learning interval in days for the content item.
     """
     learningInterval: Int
     """
     The next time the content should be learned.
     Calculated using the date the user completed the content item and the learning interval.
+    This is null if the user has not completed the content item once.
     """
     nextLearn: DateTime
 }
@@ -43,9 +45,4 @@ type ProgressLogItem {
     Can be null for contents that do not measure completion time.
     """
     timeToComplete: Int
-}
-
-type ProgressLogPayload {
-    elements: [ProgressLogItem]!
-    pageInfo: PaginationInfo!
 }

@@ -26,6 +26,10 @@ type ContentMetadata {
     """
     type: ContentType!
     """
+    Suggested start date of the content
+    """
+    suggestedStartDate: Date!
+    """
     Number of reward points a student receives for completing this content
     """
     rewardPoints: Int!
