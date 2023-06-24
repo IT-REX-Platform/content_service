@@ -40,6 +40,7 @@ public class ContentService {
 
     /**
      * Deletes Content by ID
+     *
      * @param uuid ID of Content
      * @return ID of removed Content Entity
      */
@@ -102,7 +103,8 @@ public class ContentService {
 
     /**
      * creates Link between Content Entity and Tag
-     * @param id content ID
+     *
+     * @param id      content ID
      * @param tagName name of Tag
      * @return DTO with updated Content Entity
      */
@@ -129,7 +131,8 @@ public class ContentService {
 
     /**
      * removes Link between Content Entity and Tag in both directions
-     * @param id of the Content Entity
+     *
+     * @param id      of the Content Entity
      * @param tagName name of the Tag
      * @return DTO with updated Content Entity
      */
@@ -147,6 +150,7 @@ public class ContentService {
 
     /**
      * Creates a Media Entity with given input
+     *
      * @param input to be used as basis of creation
      * @return DTO with created Assessment Entity
      */
@@ -158,6 +162,7 @@ public class ContentService {
 
     /**
      * Updates a Media Entity with given input
+     *
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
@@ -175,6 +180,7 @@ public class ContentService {
 
     /**
      * Creates an Assessment Entity with given input
+     *
      * @param input to be used as basis of creation
      * @return DTO with created Assessment Entity
      */
@@ -188,6 +194,7 @@ public class ContentService {
 
     /**
      * Updates an Assessment Entity with given input
+     *
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
@@ -205,10 +212,11 @@ public class ContentService {
 
     /**
      * Generified Content Entity create method.
+     *
      * @param contentEntity entity to be saved to database
-     * @param tags associated to the entity
+     * @param tags          associated to the entity
+     * @param <T>           all Entities that inherit from content Entity
      * @return entity saved
-     * @param <T> all Entities that inherit from content Entity
      */
     private <T extends ContentEntity> T createContent(T contentEntity, List<String> tags) {
         checkPermissionsForChapter(contentEntity.getMetadata().getChapterId());
@@ -216,20 +224,19 @@ public class ContentService {
         tagSynchronization.synchronizeTags(contentEntity, tags);
         contentEntity = contentRepository.save(contentEntity);
 
-        //publish changes
         topicPublisher.notifyChange(contentEntity, CrudOperation.CREATE);
-
 
         return contentEntity;
     }
 
     /**
      * Generified Content Entity update method.
-     * @param oldContentEntity entity to be replaced
+     *
+     * @param oldContentEntity     entity to be replaced
      * @param updatedContentEntity updated version of above entity
-     * @param tags associated to the entity
+     * @param tags                 associated to the entity
+     * @param <T>                  all Entities that inherit from content Entity
      * @return entity saved
-     * @param <T> all Entities that inherit from content Entity
      */
     private <T extends ContentEntity> T updateContent(T oldContentEntity, T updatedContentEntity, List<String> tags) {
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
@@ -245,12 +252,13 @@ public class ContentService {
 
     /**
      * method to forward received resource updates with additional information to course association topic
+     *
      * @param dto resource update dto
      */
-    public void forwardResourceUpdates(ResourceUpdateDTO dto){
+    public void forwardResourceUpdates(ResourceUpdateDTO dto) {
 
         // completeness check of input
-        if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getContentIds().isEmpty() || dto.getOperation() == null){
+        if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getContentIds().isEmpty() || dto.getOperation() == null) {
             throw new NullPointerException("incomplete message received: all fields of a message must be non-null");
         }
 
@@ -263,8 +271,6 @@ public class ContentService {
 
 
         topicPublisher.forwardChange(dto.getEntityId(), contentEntities, dto.getOperation());
-
-
     }
 
     @SuppressWarnings("java:S1172")
