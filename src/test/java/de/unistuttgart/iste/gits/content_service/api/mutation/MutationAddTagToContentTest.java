@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.testutil.GitsPostgresSqlContainer;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
+import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.test.annotation.Commit;
 
 import java.util.Set;
 import java.util.UUID;
@@ -20,10 +20,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @GraphQlApiTest
+@TablesToDelete({"content_tags", "content", "tag"})
 class MutationAddTagToContentTest {
-
-    @Container
-    static final GitsPostgresSqlContainer postgres = GitsPostgresSqlContainer.getInstance();
 
     @Autowired
     private ContentRepository contentRepository;
@@ -37,6 +35,7 @@ class MutationAddTagToContentTest {
      */
     @Test
     @Transactional
+    @Commit
     void testAddTagToContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder().build());
 
@@ -68,6 +67,7 @@ class MutationAddTagToContentTest {
      */
     @Test
     @Transactional
+    @Commit
     void testAddTagToContentWithExistingTags(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
@@ -106,6 +106,7 @@ class MutationAddTagToContentTest {
      */
     @Test
     @Transactional
+    @Commit
     void testAddDuplicateTagToContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()

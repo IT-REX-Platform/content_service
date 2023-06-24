@@ -1,20 +1,21 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
 import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
-import de.unistuttgart.iste.gits.common.testutil.GitsPostgresSqlContainer;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.TagRepository;
 import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.junit.jupiter.Container;
 
+import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,11 +26,10 @@ import static org.hamcrest.Matchers.is;
 @GraphQlApiTest
 class MutationDeleteContentTest {
 
-    @Container
-    static final GitsPostgresSqlContainer postgres = GitsPostgresSqlContainer.getInstance();
-
     @Autowired
     private ContentRepository contentRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @Autowired
     private TopicPublisher topicPublisher;
@@ -41,7 +41,13 @@ class MutationDeleteContentTest {
      */
     @Test
     void testDeleteExistingContent(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder().build());
+        ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
+                .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+                        .tags(Set.of(
+                                tagRepository.save(TagEntity.fromName("Tag")),
+                                tagRepository.save(TagEntity.fromName("Tag2"))))
+                        .build())
+                .build());
 
         String query = """
                 mutation($id: UUID!) {
@@ -56,6 +62,8 @@ class MutationDeleteContentTest {
 
         assertThat(contentRepository.findById(contentEntity.getId()).isEmpty(), is(true));
         assertThat(contentRepository.count(), is(0L));
+        // Tags are not deleted (yet)
+        assertThat(tagRepository.count(), is(2L));
 
         Mockito.verify(topicPublisher, Mockito.times(1)).notifyChange(Mockito.any(ContentEntity.class), Mockito.eq(CrudOperation.DELETE));
     }

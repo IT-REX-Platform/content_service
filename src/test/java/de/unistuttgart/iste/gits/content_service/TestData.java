@@ -7,6 +7,7 @@ import de.unistuttgart.iste.gits.content_service.persistence.dao.MediaContentEnt
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import de.unistuttgart.iste.gits.generated.dto.SkillType;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class TestData {
@@ -24,6 +25,7 @@ public class TestData {
                 .assessmentMetadata(AssessmentMetadataEmbeddable.builder()
                         .skillPoints(2)
                         .skillType(SkillType.REMEMBER)
+                        .initialLearningInterval(1)
                         .build());
     }
 
@@ -32,6 +34,7 @@ public class TestData {
                 .chapterId(UUID.randomUUID())
                 .name("Test Content")
                 .rewardPoints(0)
+                .suggestedDate(OffsetDateTime.now())
                 .type(ContentType.MEDIA);
     }
 }
