@@ -1,6 +1,9 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
+import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
+import de.unistuttgart.iste.gits.common.dapr.ResourceUpdateDTO;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
+import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
@@ -26,6 +29,7 @@ public class ContentService {
     private final ContentMapper contentMapper;
     private final ContentValidator contentValidator;
     final TagSynchronizer tagSynchronization;
+    private final TopicPublisher topicPublisher;
 
     public ContentPayload getAllContents() {
         return createContentPayload(contentRepository.findAll()
@@ -34,9 +38,22 @@ public class ContentService {
                 .toList());
     }
 
+    /**
+     * Deletes Content by ID
+     *
+     * @param uuid ID of Content
+     * @return ID of removed Content Entity
+     */
     public UUID deleteContent(UUID uuid) {
         requireContentExisting(uuid);
-        contentRepository.deleteById(uuid);
+
+        ContentEntity deletedEntity = contentRepository.getReferenceById(uuid);
+
+        contentRepository.delete(deletedEntity);
+
+        //publish changes
+        topicPublisher.notifyChange(deletedEntity, CrudOperation.DELETE);
+
         return uuid;
     }
 
@@ -59,7 +76,7 @@ public class ContentService {
                 .toList());
     }
 
-    public List<ContentPayload> getContentsByChapterIds(List<UUID> chapterIds) {
+    public List<List<Content>> getContentsByChapterIds(List<UUID> chapterIds) {
         List<List<Content>> result = new ArrayList<>(chapterIds.size());
 
         // get a list containing all contents with a matching chapter id, then map them by chapter id (multiple
@@ -76,7 +93,7 @@ public class ContentService {
             result.add(contents);
         }
 
-        return result.stream().map(this::createContentPayload).toList();
+        return result;
     }
 
     private ContentPayload createContentPayload(List<Content> contents) {
@@ -84,6 +101,13 @@ public class ContentService {
         return new ContentPayload(contents, PaginationUtil.unpagedPaginationInfo(contents.size()));
     }
 
+    /**
+     * creates Link between Content Entity and Tag
+     *
+     * @param id      content ID
+     * @param tagName name of Tag
+     * @return DTO with updated Content Entity
+     */
     public Content addTagToContent(UUID id, String tagName) {
         requireContentExisting(id);
         ContentEntity content = contentRepository.getReferenceById(id);
@@ -105,6 +129,13 @@ public class ContentService {
         return contentMapper.entityToDto(content);
     }
 
+    /**
+     * removes Link between Content Entity and Tag in both directions
+     *
+     * @param id      of the Content Entity
+     * @param tagName name of the Tag
+     * @return DTO with updated Content Entity
+     */
     public Content removeTagFromContent(UUID id, String tagName) {
         requireContentExisting(id);
         ContentEntity content = contentRepository.getReferenceById(id);
@@ -117,12 +148,24 @@ public class ContentService {
         return contentMapper.entityToDto(content);
     }
 
+    /**
+     * Creates a Media Entity with given input
+     *
+     * @param input to be used as basis of creation
+     * @return DTO with created Assessment Entity
+     */
     public MediaContent createMediaContent(CreateMediaContentInput input) {
         contentValidator.validateCreateMediaContentInput(input);
         ContentEntity contentEntity = contentMapper.mediaContentDtoToEntity(input);
         return contentMapper.mediaContentEntityToDto(createContent(contentEntity, input.getMetadata().getTagNames()));
     }
 
+    /**
+     * Updates a Media Entity with given input
+     *
+     * @param input containing updated version of entity
+     * @return DTO with updated entity
+     */
     public MediaContent updateMediaContent(UpdateMediaContentInput input) {
         contentValidator.validateUpdateMediaContentInput(input);
         requireContentExisting(input.getId());
@@ -135,6 +178,12 @@ public class ContentService {
         return contentMapper.mediaContentEntityToDto(updatedContentEntity);
     }
 
+    /**
+     * Creates an Assessment Entity with given input
+     *
+     * @param input to be used as basis of creation
+     * @return DTO with created Assessment Entity
+     */
     public Assessment createAssessment(CreateAssessmentInput input) {
         contentValidator.validateCreateAssessmentContentInput(input);
 
@@ -143,6 +192,12 @@ public class ContentService {
         return contentMapper.assessmentEntityToDto(contentEntity);
     }
 
+    /**
+     * Updates an Assessment Entity with given input
+     *
+     * @param input containing updated version of entity
+     * @return DTO with updated entity
+     */
     public Assessment updateAssessment(UpdateAssessmentInput input) {
         contentValidator.validateUpdateAssessmentContentInput(input);
         requireContentExisting(input.getId());
@@ -155,15 +210,34 @@ public class ContentService {
         return contentMapper.assessmentEntityToDto(updatedContentEntity);
     }
 
+    /**
+     * Generified Content Entity create method.
+     *
+     * @param contentEntity entity to be saved to database
+     * @param tags          associated to the entity
+     * @param <T>           all Entities that inherit from content Entity
+     * @return entity saved
+     */
     private <T extends ContentEntity> T createContent(T contentEntity, List<String> tags) {
         checkPermissionsForChapter(contentEntity.getMetadata().getChapterId());
 
         tagSynchronization.synchronizeTags(contentEntity, tags);
         contentEntity = contentRepository.save(contentEntity);
 
+        topicPublisher.notifyChange(contentEntity, CrudOperation.CREATE);
+
         return contentEntity;
     }
 
+    /**
+     * Generified Content Entity update method.
+     *
+     * @param oldContentEntity     entity to be replaced
+     * @param updatedContentEntity updated version of above entity
+     * @param tags                 associated to the entity
+     * @param <T>                  all Entities that inherit from content Entity
+     * @return entity saved
+     */
     private <T extends ContentEntity> T updateContent(T oldContentEntity, T updatedContentEntity, List<String> tags) {
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
             checkPermissionsForChapter(updatedContentEntity.getMetadata().getChapterId());
@@ -171,7 +245,32 @@ public class ContentService {
 
         tagSynchronization.synchronizeTags(updatedContentEntity, tags);
         updatedContentEntity = contentRepository.save(updatedContentEntity);
+        //TODO: publish update if chapter ID is changed and added to a different course as a result
+
         return updatedContentEntity;
+    }
+
+    /**
+     * method to forward received resource updates with additional information to course association topic
+     *
+     * @param dto resource update dto
+     */
+    public void forwardResourceUpdates(ResourceUpdateDTO dto) {
+
+        // completeness check of input
+        if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getContentIds().isEmpty() || dto.getOperation() == null) {
+            throw new NullPointerException("incomplete message received: all fields of a message must be non-null");
+        }
+
+        // find all chapter IDs
+        List<UUID> contentEntities = contentRepository.findAllById(dto.getContentIds())
+                .stream()
+                .map(contentEntity -> contentEntity.getMetadata()
+                        .getChapterId())
+                .toList();
+
+
+        topicPublisher.forwardChange(dto.getEntityId(), contentEntities, dto.getOperation());
     }
 
     @SuppressWarnings("java:S1172")

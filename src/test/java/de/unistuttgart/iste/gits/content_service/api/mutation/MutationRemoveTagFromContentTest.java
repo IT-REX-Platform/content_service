@@ -1,8 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
 
-import de.unistuttgart.iste.gits.common.testutil.GitsPostgresSqlContainer;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
+import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.test.annotation.Commit;
 
 import java.util.Set;
 import java.util.UUID;
@@ -22,10 +22,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
 @GraphQlApiTest
+@TablesToDelete({"content_tags", "content", "tag"})
 class MutationRemoveTagFromContentTest {
-
-    @Container
-    static final GitsPostgresSqlContainer postgres = GitsPostgresSqlContainer.getInstance();
 
     @Autowired
     private ContentRepository contentRepository;
@@ -40,6 +38,7 @@ class MutationRemoveTagFromContentTest {
      */
     @Test
     @Transactional
+    @Commit
     void testRemoveTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
@@ -79,6 +78,7 @@ class MutationRemoveTagFromContentTest {
      */
     @Test
     @Transactional
+    @Commit
     void testRemoveNonExistingTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()

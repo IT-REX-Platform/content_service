@@ -11,7 +11,7 @@ type Query {
     get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
     associated with that chapter
     """
-    contentsByChapterIds(chapterIds: [UUID!]!): [ContentPayload!]!
+    contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
 }
 
 type ContentPayload {

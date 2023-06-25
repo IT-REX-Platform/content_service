@@ -4,6 +4,7 @@ import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +17,9 @@ public class ContentMetadataEmbeddable {
 
     @Column(nullable = false, length = 255)
     private String name;
+
+    @Column(nullable = false)
+    private OffsetDateTime suggestedDate;
 
     @Column(nullable = false)
     private int rewardPoints;

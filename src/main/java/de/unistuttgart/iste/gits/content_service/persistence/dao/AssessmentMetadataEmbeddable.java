@@ -23,4 +23,7 @@ public class AssessmentMetadataEmbeddable {
 
     @Column(nullable = true)
     private SkillType skillType;
+
+    @Column(nullable = true)
+    private int initialLearningInterval;
 }

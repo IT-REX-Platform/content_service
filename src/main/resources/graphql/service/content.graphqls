@@ -26,9 +26,9 @@ type ContentMetadata {
     """
     type: ContentType!
     """
-    Suggested start date of the content
+    Suggested date when the content should be done
     """
-    suggestedStartDate: Date!
+    suggestedDate: DateTime!
     """
     Number of reward points a student receives for completing this content
     """
@@ -96,6 +96,14 @@ type AssessmentMetadata {
     Type of the assessment
     """
     skillType: SkillType!
+    """
+    The initial learning interval for the assessment in days.
+    This is the interval that is applied after the assessment is completed the first time.
+    Following intervals are calculated based on the previous interval and the user's performance.
+    If this is zero, the assessment will never be scheduled for review, which
+    is useful for assessments that are not meant to be repeated.
+    """
+    initialLearningInterval: Int!
 }
 
 """
