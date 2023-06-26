@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Configuration
-@Profile("dev")
+@Profile("!prod")
 @Slf4j
 public class DevTopicPublisherConfiguration {
 

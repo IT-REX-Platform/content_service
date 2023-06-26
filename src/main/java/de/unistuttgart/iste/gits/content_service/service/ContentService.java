@@ -277,4 +277,9 @@ public class ContentService {
     private void checkPermissionsForChapter(UUID chapterId) {
         // not implemented yet
     }
+
+    public ContentEntity getContentById(UUID contentId) {
+        requireContentExisting(contentId);
+        return contentRepository.getReferenceById(contentId);
+    }
 }

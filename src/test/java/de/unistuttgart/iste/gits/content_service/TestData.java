@@ -22,11 +22,14 @@ public class TestData {
                 .metadata(dummyContentMetadataEmbeddableBuilder()
                         .type(ContentType.FLASHCARDS)
                         .build())
-                .assessmentMetadata(AssessmentMetadataEmbeddable.builder()
-                        .skillPoints(2)
-                        .skillType(SkillType.REMEMBER)
-                        .initialLearningInterval(1)
-                        .build());
+                .assessmentMetadata(dummyAssessmentMetadataEmbeddableBuilder().build());
+    }
+
+    public static AssessmentMetadataEmbeddable.AssessmentMetadataEmbeddableBuilder dummyAssessmentMetadataEmbeddableBuilder() {
+        return AssessmentMetadataEmbeddable.builder()
+                .skillPoints(2)
+                .skillType(SkillType.REMEMBER)
+                .initialLearningInterval(1);
     }
 
     public static ContentMetadataEmbeddable.ContentMetadataEmbeddableBuilder dummyContentMetadataEmbeddableBuilder() {

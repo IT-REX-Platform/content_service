@@ -13,7 +13,7 @@ interface Content {
     If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userId: UUID): ProgressData!
+    userProgressData(userId: UUID): UserProgressData!
 }
 
 type ContentMetadata {
@@ -60,7 +60,7 @@ type MediaContent implements Content {
     If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userId: UUID): ProgressData!
+    userProgressData(userId: UUID): UserProgressData!
 }
 
 interface Assessment implements Content {
@@ -84,7 +84,7 @@ interface Assessment implements Content {
     If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userId: UUID): ProgressData!
+    userProgressData(userId: UUID): UserProgressData!
 }
 
 type AssessmentMetadata {
@@ -100,10 +100,10 @@ type AssessmentMetadata {
     The initial learning interval for the assessment in days.
     This is the interval that is applied after the assessment is completed the first time.
     Following intervals are calculated based on the previous interval and the user's performance.
-    If this is zero, the assessment will never be scheduled for review, which
+    If this is null, the assessment will never be scheduled for review, which
     is useful for assessments that are not meant to be repeated.
     """
-    initialLearningInterval: Int!
+    initialLearningInterval: Int
 }
 
 """
@@ -129,7 +129,7 @@ type FlashcardSetAssessment implements Assessment & Content {
     If userId is not provided, the progress data of the current user is returned.
     If the user has no permission to view the progress data to one or of the provided users, an error is thrown.
     """
-    userProgressData(userId: UUID): ProgressData!
+    userProgressData(userId: UUID): UserProgressData!
 }
 
 # add more types here

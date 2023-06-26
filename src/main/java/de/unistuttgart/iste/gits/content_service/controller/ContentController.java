@@ -1,12 +1,14 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
 import de.unistuttgart.iste.gits.content_service.service.ContentService;
+import de.unistuttgart.iste.gits.content_service.service.UserProgressDataService;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class ContentController {
 
     private final ContentService contentService;
+    private final UserProgressDataService userProgressDataService;
 
     @QueryMapping
     public ContentPayload contents() {
@@ -32,6 +35,16 @@ public class ContentController {
     @QueryMapping
     List<List<Content>> contentsByChapterIds(@Argument List<UUID> chapterIds) {
         return contentService.getContentsByChapterIds(chapterIds);
+    }
+
+    @SchemaMapping(typeName = "MediaContent", field = "userProgressData")
+    public UserProgressData userProgressData(MediaContent content, @Argument UUID userId) {
+        return userProgressDataService.getUserProgressData(userId, content.getId());
+    }
+
+    @SchemaMapping(typeName = "Assessment", field = "userProgressData")
+    public UserProgressData userProgressData(Assessment content, @Argument UUID userId) {
+        return userProgressDataService.getUserProgressData(userId, content.getId());
     }
 
     @MutationMapping
