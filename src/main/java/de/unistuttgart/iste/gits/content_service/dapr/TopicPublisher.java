@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.dapr;
 
-import de.unistuttgart.iste.gits.common.dapr.CourseAssociationDTO;
-import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
+import de.unistuttgart.iste.gits.common.event.CourseAssociation;
+import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import io.dapr.client.DaprClient;
 import io.dapr.client.DaprClientBuilder;
@@ -31,7 +31,7 @@ public class TopicPublisher {
      * method used to publish dapr messages to a topic
      * @param dto message
      */
-    private void publishChanges(CourseAssociationDTO dto){
+    private void publishChanges(CourseAssociation dto){
         log.info("publishing message");
         client.publishEvent(
                 PUBSUB_NAME,
@@ -45,7 +45,7 @@ public class TopicPublisher {
      * @param operation type of CRUD operation performed on entity
      */
     public void notifyChange(ContentEntity contentEntity, CrudOperation operation){
-        CourseAssociationDTO dto = CourseAssociationDTO.builder()
+        CourseAssociation dto = CourseAssociation.builder()
                 .resourceId(contentEntity.getId())
                 .chapterIds(List.of(contentEntity.getMetadata()
                         .getChapterId()))
@@ -62,7 +62,7 @@ public class TopicPublisher {
      * @param operation type of CRUD operation performed
      */
     public void forwardChange(UUID resourceId, List<UUID> chapterIds, CrudOperation operation){
-        CourseAssociationDTO dto = CourseAssociationDTO.builder()
+        CourseAssociation dto = CourseAssociation.builder()
                 .resourceId(resourceId)
                 .chapterIds(chapterIds)
                 .operation(operation)

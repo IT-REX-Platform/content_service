@@ -1,6 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
+
+import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;

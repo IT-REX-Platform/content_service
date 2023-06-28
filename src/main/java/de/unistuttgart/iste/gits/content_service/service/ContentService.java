@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
-import de.unistuttgart.iste.gits.common.dapr.ResourceUpdateDTO;
+import de.unistuttgart.iste.gits.common.event.CrudOperation;
+import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
@@ -255,7 +255,7 @@ public class ContentService {
      *
      * @param dto resource update dto
      */
-    public void forwardResourceUpdates(ResourceUpdateDTO dto) {
+    public void forwardResourceUpdates(ResourceUpdate dto) {
 
         // completeness check of input
         if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getContentIds().isEmpty() || dto.getOperation() == null) {

@@ -1,6 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
-import de.unistuttgart.iste.gits.common.dapr.ResourceUpdateDTO;
+
+import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
 import de.unistuttgart.iste.gits.content_service.service.ContentService;
 import io.dapr.Topic;
 import io.dapr.client.domain.CloudEvent;
@@ -28,7 +29,7 @@ public class SubscriptionController {
 
     @Topic(name = "resource-update", pubsubName = "gits")
     @PostMapping(path = "/course-service/resource-update-pubsub")
-    public Mono<Void> updateAssociation(@RequestBody(required = false) CloudEvent<ResourceUpdateDTO> cloudEvent, @RequestHeader Map<String, String> headers){
+    public Mono<Void> updateAssociation(@RequestBody(required = false) CloudEvent<ResourceUpdate> cloudEvent, @RequestHeader Map<String, String> headers){
 
             return Mono.fromRunnable( () -> contentService.forwardResourceUpdates(cloudEvent.getData()));
     }
