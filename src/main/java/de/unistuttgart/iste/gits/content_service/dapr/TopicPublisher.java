@@ -1,5 +1,6 @@
 package de.unistuttgart.iste.gits.content_service.dapr;
 
+import de.unistuttgart.iste.gits.common.event.ContentChange;
 import de.unistuttgart.iste.gits.common.event.CourseAssociation;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
@@ -19,7 +20,9 @@ import java.util.UUID;
 public class TopicPublisher {
 
     private static final String PUBSUB_NAME = "gits";
-    private static final String TOPIC_NAME = "resource-association";
+    private static final String TOPIC_RESOURCE_ASSOCIATION = "resource-association";
+
+    private static final String TOPIC_CONTENT_CHANGES = "content-changes";
 
     private final DaprClient client;
 
@@ -31,11 +34,11 @@ public class TopicPublisher {
      * method used to publish dapr messages to a topic
      * @param dto message
      */
-    private void publishChanges(CourseAssociation dto){
+    private void publishChanges(Object dto, String topic){
         log.info("publishing message");
         client.publishEvent(
                 PUBSUB_NAME,
-                TOPIC_NAME,
+                topic,
                 dto).block();
     }
 
@@ -52,7 +55,16 @@ public class TopicPublisher {
                 .operation(operation)
                 .build();
 
-        publishChanges(dto);
+        publishChanges(dto, TOPIC_RESOURCE_ASSOCIATION);
+    }
+
+    public void informContentDependantServices(List<UUID> contentEntities, CrudOperation operation){
+        ContentChange dto = ContentChange.builder()
+                .contentIds(contentEntities)
+                .operation(operation)
+                .build();
+
+        publishChanges(dto, TOPIC_CONTENT_CHANGES);
     }
 
     /**
@@ -68,7 +80,7 @@ public class TopicPublisher {
                 .operation(operation)
                 .build();
 
-        publishChanges(dto);
+        publishChanges(dto, TOPIC_RESOURCE_ASSOCIATION);
     }
 
 

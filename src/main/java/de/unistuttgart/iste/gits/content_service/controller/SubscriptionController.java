@@ -1,6 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
 
+import de.unistuttgart.iste.gits.common.event.ChapterChange;
 import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
 import de.unistuttgart.iste.gits.content_service.service.ContentService;
 import io.dapr.Topic;
@@ -28,9 +29,16 @@ public class SubscriptionController {
     }
 
     @Topic(name = "resource-update", pubsubName = "gits")
-    @PostMapping(path = "/course-service/resource-update-pubsub")
+    @PostMapping(path = "/content-service/resource-update-pubsub")
     public Mono<Void> updateAssociation(@RequestBody(required = false) CloudEvent<ResourceUpdate> cloudEvent, @RequestHeader Map<String, String> headers){
 
             return Mono.fromRunnable( () -> contentService.forwardResourceUpdates(cloudEvent.getData()));
+    }
+
+    @Topic(name = "chapter-changes", pubsubName = "gits")
+    @PostMapping(path = "/content-service/chapter-changes-pubsub")
+    public Mono<Void> cascadeCourseDeletion(@RequestBody(required = false) CloudEvent<ChapterChange> cloudEvent, @RequestHeader Map<String, String> headers){
+
+        return Mono.fromRunnable( () -> contentService.cascadeContentDeletion(cloudEvent.getData()));
     }
 }

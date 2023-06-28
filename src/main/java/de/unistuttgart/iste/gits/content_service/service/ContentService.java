@@ -1,5 +1,6 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
+import de.unistuttgart.iste.gits.common.event.ChapterChange;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
@@ -53,6 +54,7 @@ public class ContentService {
 
         //publish changes
         topicPublisher.notifyChange(deletedEntity, CrudOperation.DELETE);
+        topicPublisher.informContentDependantServices(List.of(deletedEntity.getId()), CrudOperation.DELETE);
 
         return uuid;
     }
@@ -245,7 +247,11 @@ public class ContentService {
 
         tagSynchronization.synchronizeTags(updatedContentEntity, tags);
         updatedContentEntity = contentRepository.save(updatedContentEntity);
+
         //TODO: publish update if chapter ID is changed and added to a different course as a result
+        if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
+            topicPublisher.informContentDependantServices(List.of(updatedContentEntity.getId()), CrudOperation.UPDATE);
+        }
 
         return updatedContentEntity;
     }
@@ -272,6 +278,40 @@ public class ContentService {
 
         topicPublisher.forwardChange(dto.getEntityId(), contentEntities, dto.getOperation());
     }
+
+    /**
+     * Method that cascades the deletion of chapters to chapter-dependant-content
+     *
+     * @param dto
+     */
+    public void cascadeContentDeletion(ChapterChange dto) {
+        List<UUID> chapterIds;
+        List<UUID> contentIds = new ArrayList<>();
+
+        // ignore any messages that are not deletion messages
+        if (!dto.getOperation().equals(CrudOperation.DELETE)) {
+            return;
+        }
+
+        chapterIds = dto.getChapterIds();
+
+        // make sure message is complete
+        if (chapterIds == null || chapterIds.isEmpty()) {
+            throw new NullPointerException("incomplete message received: all fields of a message must be non-null");
+        }
+
+        List<ContentEntity> contentEntities = contentRepository.findByChapterIdIn(chapterIds);
+
+        for (ContentEntity entity : contentEntities) {
+            contentIds.add(entity.getId());
+            contentRepository.delete(entity);
+        }
+
+        // inform dependant services that content entities were deleted
+        topicPublisher.informContentDependantServices(contentIds, CrudOperation.DELETE);
+
+    }
+
 
     @SuppressWarnings("java:S1172")
     private void checkPermissionsForChapter(UUID chapterId) {
