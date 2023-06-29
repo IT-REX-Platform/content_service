@@ -58,9 +58,9 @@ public class TopicPublisher {
         publishChanges(dto, TOPIC_RESOURCE_ASSOCIATION);
     }
 
-    public void informContentDependantServices(List<UUID> contentEntities, CrudOperation operation){
+    public void informContentDependantServices(List<UUID> contentEntityIds, CrudOperation operation){
         ContentChange dto = ContentChange.builder()
-                .contentIds(contentEntities)
+                .contentIds(contentEntityIds)
                 .operation(operation)
                 .build();
 

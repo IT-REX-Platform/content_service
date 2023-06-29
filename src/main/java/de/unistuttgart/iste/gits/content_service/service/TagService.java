@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TagSynchronizer {
+public class TagService {
 
     private final TagRepository tagRepository;
 

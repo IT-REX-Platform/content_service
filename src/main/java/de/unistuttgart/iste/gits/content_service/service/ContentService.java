@@ -29,7 +29,7 @@ public class ContentService {
     private final TagRepository tagRepository;
     private final ContentMapper contentMapper;
     private final ContentValidator contentValidator;
-    final TagSynchronizer tagSynchronization;
+    final TagService tagSynchronization;
     private final TopicPublisher topicPublisher;
 
     public ContentPayload getAllContents() {
@@ -248,7 +248,7 @@ public class ContentService {
         tagSynchronization.synchronizeTags(updatedContentEntity, tags);
         updatedContentEntity = contentRepository.save(updatedContentEntity);
 
-        //TODO: publish update if chapter ID is changed and added to a different course as a result
+        // if the content is assigned to a different chapter course Links need to be potentially updated and therefore an Update request is sent to the resource services
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
             topicPublisher.informContentDependantServices(List.of(updatedContentEntity.getId()), CrudOperation.UPDATE);
         }
@@ -269,35 +269,36 @@ public class ContentService {
         }
 
         // find all chapter IDs
-        List<UUID> contentEntities = contentRepository.findAllById(dto.getContentIds())
+        List<UUID> contentEntityIds = contentRepository.findAllById(dto.getContentIds())
                 .stream()
                 .map(contentEntity -> contentEntity.getMetadata()
                         .getChapterId())
                 .toList();
 
 
-        topicPublisher.forwardChange(dto.getEntityId(), contentEntities, dto.getOperation());
+        topicPublisher.forwardChange(dto.getEntityId(), contentEntityIds, dto.getOperation());
     }
 
     /**
      * Method that cascades the deletion of chapters to chapter-dependant-content
      *
-     * @param dto
+     * @param dto message containing information about to be deleted entities
      */
     public void cascadeContentDeletion(ChapterChange dto) {
         List<UUID> chapterIds;
         List<UUID> contentIds = new ArrayList<>();
 
-        // ignore any messages that are not deletion messages
-        if (!dto.getOperation().equals(CrudOperation.DELETE)) {
-            return;
-        }
 
         chapterIds = dto.getChapterIds();
 
         // make sure message is complete
-        if (chapterIds == null || chapterIds.isEmpty()) {
+        if (chapterIds == null || chapterIds.isEmpty() || dto.getOperation() == null) {
             throw new NullPointerException("incomplete message received: all fields of a message must be non-null");
+        }
+
+        // ignore any messages that are not deletion messages
+        if (!dto.getOperation().equals(CrudOperation.DELETE)) {
+            return;
         }
 
         List<ContentEntity> contentEntities = contentRepository.findByChapterIdIn(chapterIds);

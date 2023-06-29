@@ -19,11 +19,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TagSynchronizerTest {
+class TagServiceTest {
     @Mock
     private TagRepository tagRepository;
     @InjectMocks
-    private TagSynchronizer tagSynchronizer;
+    private TagService tagService;
 
     Set<String> getTagNames(Collection<TagEntity> tags) {
         return tags.stream().filter(Objects::nonNull).map(TagEntity::getName).collect(Collectors.toSet());
@@ -32,7 +32,7 @@ class TagSynchronizerTest {
     @Test
     void testTagSynchronisationNoExistingTagsSuccessful() {
         List<String> tagNames = List.of("Tag1", "Tag2", "Tag3");
-        TagSynchronizer.TagSynchronizationResult result = tagSynchronizer.prepareSynchronization(tagNames,
+        TagService.TagSynchronizationResult result = tagService.prepareSynchronization(tagNames,
                 Collections.emptyList(), Collections.emptyList());
         assertThat(getTagNames(result.newTagsToAdd()), containsInAnyOrder(tagNames.toArray()));
     }
@@ -42,7 +42,7 @@ class TagSynchronizerTest {
         List<String> tagNames = List.of("Tag1", "Tag2", "Tag3");
         TagEntity existingTag = TagEntity.fromName(tagNames.get(1));
         List<String> newTagNamesToAdd = List.of(tagNames.get(0), tagNames.get(2));
-        TagSynchronizer.TagSynchronizationResult result = tagSynchronizer.prepareSynchronization(tagNames,
+        TagService.TagSynchronizationResult result = tagService.prepareSynchronization(tagNames,
                 Collections.emptyList(),
                 List.of(existingTag));
         assertThat(getTagNames(result.newTagsToAdd()), containsInAnyOrder(newTagNamesToAdd.toArray()));
@@ -54,7 +54,7 @@ class TagSynchronizerTest {
         List<String> tagNames = List.of("Tag1", "Tag2", "Tag3");
         TagEntity existingTag = TagEntity.fromName(tagNames.get(1));
         List<String> newTagNamesToAdd = List.of(tagNames.get(0), tagNames.get(2));
-        TagSynchronizer.TagSynchronizationResult result = tagSynchronizer.prepareSynchronization(tagNames,
+        TagService.TagSynchronizationResult result = tagService.prepareSynchronization(tagNames,
                 List.of(existingTag),
                 List.of(existingTag));
         assertThat(getTagNames(result.newTagsToAdd()), containsInAnyOrder(newTagNamesToAdd.toArray()));
@@ -68,7 +68,7 @@ class TagSynchronizerTest {
         TagEntity existingTag = TagEntity.fromName("Tag2");
         List<String> newTagNamesToAdd = List.of(tagNames.get(0));
         List<String> existingTagNamesToRemove = List.of("Tag2");
-        TagSynchronizer.TagSynchronizationResult result = tagSynchronizer.prepareSynchronization(tagNames,
+        TagService.TagSynchronizationResult result = tagService.prepareSynchronization(tagNames,
                 List.of(existingTag),
                 List.of(existingTag));
         assertThat(getTagNames(result.newTagsToAdd()), containsInAnyOrder(newTagNamesToAdd.toArray()));
@@ -80,7 +80,7 @@ class TagSynchronizerTest {
     void testSynchronizeWithDbAddNewTagsSuccessful() {
         List<String> tagNames = List.of("Tag1");
         TagEntity newTag = TagEntity.fromName(tagNames.get(0));
-        TagSynchronizer.TagSynchronizationResult preparation = new TagSynchronizer.TagSynchronizationResult(
+        TagService.TagSynchronizationResult preparation = new TagService.TagSynchronizationResult(
                 Collections.emptyList(),
                 List.of(newTag),
                 Collections.emptyList()
@@ -88,7 +88,7 @@ class TagSynchronizerTest {
         ContentEntity content = new ContentEntity();
         content.setId(UUID.randomUUID());
         when(tagRepository.save(Mockito.any(TagEntity.class))).thenAnswer(i -> i.getArguments()[0]);
-        tagSynchronizer.synchronizeWithDatabase(content, preparation);
+        tagService.synchronizeWithDatabase(content, preparation);
         verify(tagRepository).save(newTag);
         assertThat(content.getMetadata().getTags(), is(equalTo(Set.of(newTag))));
         assertThat(newTag.getContents(), is(equalTo(Set.of(content))));
@@ -98,14 +98,14 @@ class TagSynchronizerTest {
     void testSynchronizeWithDbAddNewContentToExistingTagSuccessful() {
         List<String> tagNames = List.of("Tag1");
         TagEntity existingTag = TagEntity.fromName(tagNames.get(0));
-        TagSynchronizer.TagSynchronizationResult preparation = new TagSynchronizer.TagSynchronizationResult(
+        TagService.TagSynchronizationResult preparation = new TagService.TagSynchronizationResult(
                 List.of(existingTag),
                 Collections.emptyList(),
                 Collections.emptyList()
         );
         ContentEntity content = new ContentEntity();
         content.setId(UUID.randomUUID());
-        tagSynchronizer.synchronizeWithDatabase(content, preparation);
+        tagService.synchronizeWithDatabase(content, preparation);
         assertThat(content.getMetadata().getTags(), is(equalTo(Set.of(existingTag))));
         assertThat(existingTag.getContents(), is(equalTo(Set.of(content))));
     }
@@ -117,12 +117,12 @@ class TagSynchronizerTest {
         TagEntity existingTag = TagEntity.fromName("Tag1");
         content.addToTags(existingTag);
         existingTag.addToContents(content);
-        TagSynchronizer.TagSynchronizationResult preparation = new TagSynchronizer.TagSynchronizationResult(
+        TagService.TagSynchronizationResult preparation = new TagService.TagSynchronizationResult(
                 Collections.emptyList(),
                 Collections.emptyList(),
                 List.of(existingTag)
         );
-        tagSynchronizer.synchronizeWithDatabase(content, preparation);
+        tagService.synchronizeWithDatabase(content, preparation);
         assertThat(content.getMetadata().getTags().size(), is(equalTo(0)));
         assertThat(existingTag.getContents().size(), is(equalTo(0)));
     }
