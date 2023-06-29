@@ -1,8 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.common.event.ChapterChange;
+import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
-import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
+import de.unistuttgart.iste.gits.common.event.ResourceUpdateEvent;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentMetadataEmbeddable;
@@ -41,7 +41,7 @@ class ContentServiceTest {
     @Test
     void forwardResourceUpdates() {
 
-        ResourceUpdate dto = ResourceUpdate.builder()
+        ResourceUpdateEvent dto = ResourceUpdateEvent.builder()
                 .entityId(UUID.randomUUID())
                 .contentIds(List.of(UUID.randomUUID()))
                 .operation(CrudOperation.CREATE)
@@ -72,20 +72,20 @@ class ContentServiceTest {
 
     @Test
     void forwardFaultyResourceUpdates() {
-        ResourceUpdate noEntityDto = ResourceUpdate.builder()
+        ResourceUpdateEvent noEntityDto = ResourceUpdateEvent.builder()
                 .contentIds(List.of(UUID.randomUUID()))
                 .operation(CrudOperation.CREATE)
                 .build();
-        ResourceUpdate nullListDto = ResourceUpdate.builder()
+        ResourceUpdateEvent nullListDto = ResourceUpdateEvent.builder()
                 .entityId(UUID.randomUUID())
                 .operation(CrudOperation.CREATE)
                 .build();
-        ResourceUpdate emptyListDto = ResourceUpdate.builder()
+        ResourceUpdateEvent emptyListDto = ResourceUpdateEvent.builder()
                 .entityId(UUID.randomUUID())
                 .contentIds(new ArrayList<UUID>())
                 .operation(CrudOperation.CREATE)
                 .build();
-        ResourceUpdate noOperationDto = ResourceUpdate.builder()
+        ResourceUpdateEvent noOperationDto = ResourceUpdateEvent.builder()
                 .entityId(UUID.randomUUID())
                 .contentIds(List.of(UUID.randomUUID()))
                 .build();
@@ -100,7 +100,7 @@ class ContentServiceTest {
     @Test
     void cascadeContentDeletion() {
 
-        ChapterChange dto = ChapterChange.builder()
+        ChapterChangeEvent dto = ChapterChangeEvent.builder()
                 .chapterIds(List.of(UUID.randomUUID(), UUID.randomUUID()))
                 .operation(CrudOperation.DELETE)
                 .build();
@@ -143,18 +143,18 @@ class ContentServiceTest {
 
     @Test
     void testFaultyCascadeContentDeletion(){
-        ChapterChange wrongOperatorDto = ChapterChange.builder()
+        ChapterChangeEvent wrongOperatorDto = ChapterChangeEvent.builder()
                 .chapterIds(List.of(UUID.randomUUID()))
                 .operation(CrudOperation.CREATE)
                 .build();
-        ChapterChange emptyListDto = ChapterChange.builder()
+        ChapterChangeEvent emptyListDto = ChapterChangeEvent.builder()
                 .chapterIds(new ArrayList<UUID>())
                 .operation(CrudOperation.DELETE)
                 .build();
-        ChapterChange nullListDto = ChapterChange.builder()
+        ChapterChangeEvent nullListDto = ChapterChangeEvent.builder()
                 .operation(CrudOperation.DELETE)
                 .build();
-        ChapterChange noOperationDto = ChapterChange.builder()
+        ChapterChangeEvent noOperationDto = ChapterChangeEvent.builder()
                 .chapterIds(new ArrayList<UUID>())
                 .build();
 

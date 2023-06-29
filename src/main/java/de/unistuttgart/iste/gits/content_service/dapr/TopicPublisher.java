@@ -1,7 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.dapr;
 
-import de.unistuttgart.iste.gits.common.event.ContentChange;
-import de.unistuttgart.iste.gits.common.event.CourseAssociation;
+
+import de.unistuttgart.iste.gits.common.event.ContentChangeEvent;
+import de.unistuttgart.iste.gits.common.event.CourseAssociationEvent;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import io.dapr.client.DaprClient;
@@ -43,7 +44,7 @@ public class TopicPublisher {
      * @param operation type of CRUD operation performed on entity
      */
     public void notifyChange(ContentEntity contentEntity, CrudOperation operation){
-        CourseAssociation dto = CourseAssociation.builder()
+        CourseAssociationEvent dto = CourseAssociationEvent.builder()
                 .resourceId(contentEntity.getId())
                 .chapterIds(List.of(contentEntity.getMetadata()
                         .getChapterId()))
@@ -54,7 +55,7 @@ public class TopicPublisher {
     }
 
     public void informContentDependantServices(List<UUID> contentEntityIds, CrudOperation operation){
-        ContentChange dto = ContentChange.builder()
+        ContentChangeEvent dto = ContentChangeEvent.builder()
                 .contentIds(contentEntityIds)
                 .operation(operation)
                 .build();
@@ -69,7 +70,7 @@ public class TopicPublisher {
      * @param operation type of CRUD operation performed
      */
     public void forwardChange(UUID resourceId, List<UUID> chapterIds, CrudOperation operation){
-        CourseAssociation dto = CourseAssociation.builder()
+        CourseAssociationEvent dto = CourseAssociationEvent.builder()
                 .resourceId(resourceId)
                 .chapterIds(chapterIds)
                 .operation(operation)

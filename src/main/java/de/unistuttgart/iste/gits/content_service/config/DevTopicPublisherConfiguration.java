@@ -1,6 +1,6 @@
 package de.unistuttgart.iste.gits.content_service.config;
 
-import de.unistuttgart.iste.gits.common.dapr.CrudOperation;
+import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import lombok.extern.slf4j.Slf4j;

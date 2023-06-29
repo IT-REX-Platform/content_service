@@ -1,8 +1,9 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.common.event.ChapterChange;
+
+import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
-import de.unistuttgart.iste.gits.common.event.ResourceUpdate;
+import de.unistuttgart.iste.gits.common.event.ResourceUpdateEvent;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
@@ -261,7 +262,7 @@ public class ContentService {
      *
      * @param dto resource update dto
      */
-    public void forwardResourceUpdates(ResourceUpdate dto) {
+    public void forwardResourceUpdates(ResourceUpdateEvent dto) {
 
         // completeness check of input
         if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getContentIds().isEmpty() || dto.getOperation() == null) {
@@ -284,7 +285,7 @@ public class ContentService {
      *
      * @param dto message containing information about to be deleted entities
      */
-    public void cascadeContentDeletion(ChapterChange dto) {
+    public void cascadeContentDeletion(ChapterChangeEvent dto) {
         List<UUID> chapterIds;
         List<UUID> contentIds = new ArrayList<>();
 
