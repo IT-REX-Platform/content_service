@@ -1,0 +1,60 @@
+"""
+Represents a user's progress on a content item.
+See https://gits-enpro.readthedocs.io/en/latest/dev-manuals/gamification/userProgress.html
+"""
+type UserProgressData {
+    """
+    The user's id.
+    """
+    userId: UUID!
+    """
+    The id of the content item.
+    """
+    contentId: UUID!
+    """
+    A list of entries each representing the user completing the content item.
+    Sorted by date in descending order.
+    """
+    log: [ProgressLogItem]!
+    """
+    The learning interval in days for the content item.
+    If null, the content item is not scheduled for learning.
+    """
+    learningInterval: Int
+    """
+    The next time the content should be learned.
+    Calculated using the date the user completed the content item and the learning interval.
+    This is null if the user has not completed the content item once.
+    """
+    nextLearnDate: DateTime
+    """
+    The last time the content was learned.
+    This is null if the user has not completed the content item once.
+    """
+    lastLearnDate: DateTime
+}
+
+type ProgressLogItem {
+    """
+    The date the user completed the content item.
+    """
+    timestamp: DateTime!
+    """
+    Whether the user completed the content item successfully.
+    """
+    success: Boolean!
+    """
+    Value between 0 and 1 representing the user's correctness on the content item.
+    Can be null as some contents cannot provide a meaningful correctness value.
+    """
+    correctness: Float!
+    """
+    How many hints the user used to complete the content item.
+    """
+    hintsUsed: Int!
+    """
+    Time in milliseconds it took the user to complete the content item.
+    Can be null for contents that do not measure completion time.
+    """
+    timeToComplete: Int
+}

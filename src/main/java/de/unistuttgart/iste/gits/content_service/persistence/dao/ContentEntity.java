@@ -54,6 +54,11 @@ public class ContentEntity {
     @Builder.Default
     private ContentMetadataEmbeddable metadata = new ContentMetadataEmbeddable();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "content_id")
+    @Builder.Default
+    private List<UserProgressDataEntity> userProgressData = new ArrayList<>();
+
     public List<String> getTagNames() {
         return Optional.ofNullable(metadata.getTags())
                 .map(tags -> tags.stream().map(TagEntity::getName).toList())
