@@ -55,7 +55,7 @@ public class ContentService {
 
         //publish changes
         topicPublisher.notifyChange(deletedEntity, CrudOperation.DELETE);
-        topicPublisher.informContentDependantServices(List.of(deletedEntity.getId()), CrudOperation.DELETE);
+        topicPublisher.informContentDependentServices(List.of(deletedEntity.getId()), CrudOperation.DELETE);
 
         return uuid;
     }
@@ -251,7 +251,7 @@ public class ContentService {
 
         // if the content is assigned to a different chapter course Links need to be potentially updated and therefore an Update request is sent to the resource services
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
-            topicPublisher.informContentDependantServices(List.of(updatedContentEntity.getId()), CrudOperation.UPDATE);
+            topicPublisher.informContentDependentServices(List.of(updatedContentEntity.getId()), CrudOperation.UPDATE);
         }
 
         return updatedContentEntity;
@@ -310,7 +310,7 @@ public class ContentService {
         }
 
         // inform dependant services that content entities were deleted
-        topicPublisher.informContentDependantServices(contentIds, CrudOperation.DELETE);
+        topicPublisher.informContentDependentServices(contentIds, CrudOperation.DELETE);
 
     }
 

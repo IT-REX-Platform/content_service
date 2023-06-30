@@ -21,7 +21,7 @@ public class MockTopicPublisherConfiguration {
         TopicPublisher mockPublisher = Mockito.mock(TopicPublisher.class);
         Mockito.doNothing().when(mockPublisher).notifyChange(Mockito.any(ContentEntity.class), Mockito.any());
         Mockito.doNothing().when(mockPublisher).forwardChange(Mockito.any(UUID.class), Mockito.any(List.class), Mockito.any(CrudOperation.class));
-        Mockito.doNothing().when(mockPublisher).informContentDependantServices(Mockito.any(List.class), Mockito.any(CrudOperation.class));
+        Mockito.doNothing().when(mockPublisher).informContentDependentServices(Mockito.any(List.class), Mockito.any(CrudOperation.class));
         return mockPublisher;
     }
 }

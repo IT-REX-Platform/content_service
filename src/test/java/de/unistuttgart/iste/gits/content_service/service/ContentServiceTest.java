@@ -138,7 +138,7 @@ class ContentServiceTest {
         contentService.cascadeContentDeletion(dto);
 
         verify(contentRepository, times(2)).delete(any(ContentEntity.class));
-        verify(mockPublisher, times(1)).informContentDependantServices(List.of(testEntity.getId(), testEntity2.getId()), CrudOperation.DELETE);
+        verify(mockPublisher, times(1)).informContentDependentServices(List.of(testEntity.getId(), testEntity2.getId()), CrudOperation.DELETE);
     }
 
     @Test
@@ -164,7 +164,7 @@ class ContentServiceTest {
         // ends before any DB access is made
         verify(contentRepository, times(0)).findByChapterIdIn(any());
         verify(contentRepository, times(0)).delete(any(ContentEntity.class));
-        verify(mockPublisher, times(0)).informContentDependantServices(any(), any());
+        verify(mockPublisher, times(0)).informContentDependentServices(any(), any());
 
 
         //execute method under test
