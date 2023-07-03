@@ -35,11 +35,6 @@ public class ContentController {
         return contentService.getContentsByChapterIds(chapterIds);
     }
 
-    @SchemaMapping(typeName = "MediaContent", field = "userProgressData")
-    public UserProgressData userProgressData(MediaContent content, @ContextValue LoggedInUser currentUser) {
-        return userProgressDataService.getUserProgressData(currentUser.getId(), content.getId());
-    }
-
     @MutationMapping
     public MediaContent createMediaContent(@Argument CreateMediaContentInput input) {
         return contentService.createMediaContent(input);
@@ -74,6 +69,26 @@ public class ContentController {
     public Content removeTagFromContent(@Argument("contentId") UUID id, @Argument String tagName) {
         return contentService.removeTagFromContent(id, tagName);
     }
+
+    public abstract class ContentResolver<T extends Content> {
+        @SchemaMapping(field = "userProgressData")
+        public UserProgressData userProgressData(T content, @ContextValue LoggedInUser currentUser) {
+            return userProgressDataService.getUserProgressData(currentUser.getId(), content.getId());
+        }
+
+        @SchemaMapping(field = "progressDataForUser")
+        public UserProgressData progressDataForUser(T content, @Argument UUID userId) {
+            return userProgressDataService.getUserProgressData(userId, content.getId());
+        }
+    }
+
+    public abstract class AssessmentResolver<T extends Assessment> extends ContentResolver<T> { }
+
+    @Controller
+    public class MediaContentResolver extends ContentResolver<MediaContent> { }
+
+    @Controller
+    public class FlashcardSetAssessmentResolver extends ContentResolver<FlashcardSetAssessment> { }
 
 }
 
