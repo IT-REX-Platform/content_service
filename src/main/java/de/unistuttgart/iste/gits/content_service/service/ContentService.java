@@ -289,7 +289,6 @@ public class ContentService {
         List<UUID> chapterIds;
         List<UUID> contentIds = new ArrayList<>();
 
-
         chapterIds = dto.getChapterIds();
 
         // make sure message is complete
@@ -315,10 +314,7 @@ public class ContentService {
             // inform dependant services that content entities were deleted
             topicPublisher.informContentDependentServices(contentIds, CrudOperation.DELETE);
         }
-
-
     }
-
 
     @SuppressWarnings("java:S1172")
     private void checkPermissionsForChapter(UUID chapterId) {

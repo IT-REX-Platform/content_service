@@ -29,12 +29,8 @@ public class ContentMetadataEmbeddable {
     private ContentType type;
 
     @EqualsAndHashCode.Exclude
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "content_tags",
-            joinColumns = @JoinColumn(name = "content_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
+    @ManyToMany(fetch = FetchType.LAZY, cascade =
+            {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<TagEntity> tags;
 
     @Column(nullable = false, name = "chapter_id")

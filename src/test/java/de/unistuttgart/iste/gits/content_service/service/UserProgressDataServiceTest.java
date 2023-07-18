@@ -43,7 +43,7 @@ class UserProgressDataServiceTest {
                 .contentId(UUID.randomUUID())
                 .build();
 
-        doReturn(Optional.of(userProgressEntity)).when(userProgressDataRepository).findById(any());
+        doReturn(Optional.of(userProgressEntity)).when(userProgressDataRepository).findByUserIdAndContentId(any(), any());
 
         var actual = userProgressDataService
                 .getUserProgressData(userProgressEntity.getUserId(), userProgressEntity.getContentId());
@@ -55,7 +55,7 @@ class UserProgressDataServiceTest {
         assertThat(actual.getNextLearnDate(), is(nullValue()));
         assertThat(actual.getLog(), is(empty()));
 
-        verify(userProgressDataRepository).findById(any());
+        verify(userProgressDataRepository).findByUserIdAndContentId(any(), any());
     }
 
     /**
@@ -80,7 +80,7 @@ class UserProgressDataServiceTest {
                 .contentId(UUID.randomUUID())
                 .build();
 
-        doReturn(Optional.of(userProgressEntity)).when(userProgressDataRepository).findById(any());
+        doReturn(Optional.of(userProgressEntity)).when(userProgressDataRepository).findByUserIdAndContentId(any(), any());
 
         var actual = userProgressDataService
                 .getUserProgressData(userProgressEntity.getUserId(), userProgressEntity.getContentId());
@@ -95,7 +95,7 @@ class UserProgressDataServiceTest {
         assertThat(actual.getNextLearnDate(), is(expectedNextLearnDate));
         assertThat(actual.getLog(), hasSize(1));
 
-        verify(userProgressDataRepository).findById(any());
+        verify(userProgressDataRepository).findByUserIdAndContentId(any(), any());
     }
 
     @Test
@@ -108,7 +108,7 @@ class UserProgressDataServiceTest {
                         .build())
                 .id(contentId).build();
 
-        doReturn(Optional.empty()).when(userProgressDataRepository).findById(any());
+        doReturn(Optional.empty()).when(userProgressDataRepository).findByUserIdAndContentId(any(), any());
         doReturn(assessmentEntity).when(contentService).getContentById(any());
         // save method returns its argument
         doAnswer(returnsFirstArg()).when(userProgressDataRepository).save(any(UserProgressDataEntity.class));
@@ -122,7 +122,7 @@ class UserProgressDataServiceTest {
         assertThat(actual.getNextLearnDate(), is(nullValue()));
         assertThat(actual.getLog(), is(empty()));
 
-        verify(userProgressDataRepository).findById(any());
+        verify(userProgressDataRepository).findByUserIdAndContentId(any(), any());
         verify(userProgressDataRepository, times(1)).save(any(UserProgressDataEntity.class));
     }
 
@@ -151,7 +151,7 @@ class UserProgressDataServiceTest {
                 .contentId(contentId)
                 .build();
 
-        doReturn(Optional.of(initialProgress)).when(userProgressDataRepository).findById(any());
+        doReturn(Optional.of(initialProgress)).when(userProgressDataRepository).findByUserIdAndContentId(any(), any());
         doAnswer(returnsFirstArg()).when(userProgressDataRepository).save(any(UserProgressDataEntity.class));
 
         userProgressDataService.logUserProgress(event);

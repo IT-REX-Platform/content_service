@@ -4,7 +4,6 @@ import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.AssessmentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataPrimaryKey;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import de.unistuttgart.iste.gits.generated.dto.UserProgressData;
@@ -37,7 +36,7 @@ public class UserProgressDataService {
 
     private UserProgressDataEntity getUserProgressDataEntity(UUID userId, UUID contentId) {
         return userProgressDataRepository
-                .findById(new UserProgressDataPrimaryKey(userId, contentId))
+                .findByUserIdAndContentId(userId, contentId)
                 .orElseGet(() -> createInitialUserProgressData(userId, contentId));
     }
 
@@ -48,6 +47,7 @@ public class UserProgressDataService {
         Integer learningInterval = contentEntity instanceof AssessmentEntity assessmentEntity
                 ? assessmentEntity.getAssessmentMetadata().getInitialLearningInterval()
                 : null;
+
         UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
                 .userId(userId)
                 .contentId(contentId)

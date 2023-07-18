@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DiscriminatorFormula;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +56,8 @@ public class ContentEntity {
     @Builder.Default
     private ContentMetadataEmbeddable metadata = new ContentMetadataEmbeddable();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "content_id")
     @Builder.Default
     private List<UserProgressDataEntity> userProgressData = new ArrayList<>();

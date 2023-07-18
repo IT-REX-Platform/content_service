@@ -38,5 +38,10 @@ public class DevTopicPublisherConfiguration {
         public void forwardChange(UUID resourceId, List<UUID> chapterIds, CrudOperation operation) {
             log.info("forwardChange called with {}, {} and {}", resourceId, chapterIds, operation);
         }
+
+        @Override
+        public void informContentDependentServices(List<UUID> contentEntityIds, CrudOperation operation) {
+            log.info("informContentDependentServices called with {} and {}", contentEntityIds, operation);
+        }
     }
 }

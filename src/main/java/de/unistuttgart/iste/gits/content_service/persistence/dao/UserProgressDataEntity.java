@@ -17,15 +17,16 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@IdClass(UserProgressDataPrimaryKey.class)
 public class UserProgressDataEntity {
 
     @Id
-    @Column(name = "user_id", nullable = false)
+    @GeneratedValue
+    private UUID id;
+
+    @Column(name = "user_id")
     private UUID userId;
 
-    @Id
-    @Column(name = "content_id", nullable = false)
+    @Column(name = "content_id")
     private UUID contentId;
 
     @ElementCollection

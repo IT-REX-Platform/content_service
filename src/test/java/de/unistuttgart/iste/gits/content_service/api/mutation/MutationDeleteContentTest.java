@@ -2,35 +2,43 @@ package de.unistuttgart.iste.gits.content_service.api.mutation;
 
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
+import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.TagRepository;
 import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
 @GraphQlApiTest
+@TablesToDelete({"content_tags", "user_progress_data", "content", "tag"})
 class MutationDeleteContentTest {
 
     @Autowired
     private ContentRepository contentRepository;
     @Autowired
     private TagRepository tagRepository;
-
     @Autowired
     private TopicPublisher topicPublisher;
 
@@ -40,13 +48,24 @@ class MutationDeleteContentTest {
      * Then the content is deleted
      */
     @Test
+    @Transactional
+    @Commit
     void testDeleteExistingContent(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
+        ContentEntity contentEntity = contentRepository.save(TestData.dummyAssessmentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                         .tags(Set.of(
-                                tagRepository.save(TagEntity.fromName("Tag")),
-                                tagRepository.save(TagEntity.fromName("Tag2"))))
+                                TagEntity.fromName("Tag"),
+                                TagEntity.fromName("Tag2")))
                         .build())
+                .userProgressData(List.of(
+                        UserProgressDataEntity.builder()
+                                .userId(UUID.randomUUID())
+                                .learningInterval(2)
+                                .build(),
+                        UserProgressDataEntity.builder()
+                                .userId(UUID.randomUUID())
+                                .learningInterval(1)
+                                .build()))
                 .build());
 
         String query = """
@@ -61,11 +80,13 @@ class MutationDeleteContentTest {
                 .path("deleteContent").entity(UUID.class).isEqualTo(contentEntity.getId());
 
         assertThat(contentRepository.findById(contentEntity.getId()).isEmpty(), is(true));
+        System.out.println(contentRepository.findAll());
         assertThat(contentRepository.count(), is(0L));
         // Tags are not deleted (yet)
         assertThat(tagRepository.count(), is(2L));
 
-        Mockito.verify(topicPublisher, Mockito.times(1)).notifyChange(Mockito.any(ContentEntity.class), Mockito.eq(CrudOperation.DELETE));
+        verify(topicPublisher, times(1))
+                .notifyChange(any(ContentEntity.class), eq(CrudOperation.DELETE));
     }
 
     /**

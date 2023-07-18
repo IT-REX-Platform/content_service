@@ -7,7 +7,6 @@ import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,6 @@ class MutationRemoveTagFromContentTest {
     @Autowired
     private ContentRepository contentRepository;
 
-    @Autowired
-    private TagRepository tagRepository;
-
     /**
      * Given a content with tags
      * When the removeTagFromContent mutation is called
@@ -42,8 +38,7 @@ class MutationRemoveTagFromContentTest {
     void testRemoveTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(tagRepository.save(TagEntity.fromName("tag1")),
-                                tagRepository.save(TagEntity.fromName("tag2"))))
+                        .tags(Set.of(TagEntity.fromName("tag1"), TagEntity.fromName("tag2")))
                         .build())
                 .build());
 
@@ -82,8 +77,7 @@ class MutationRemoveTagFromContentTest {
     void testRemoveNonExistingTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(tagRepository.save(TagEntity.fromName("tag1")),
-                                tagRepository.save(TagEntity.fromName("tag2"))))
+                        .tags(Set.of(TagEntity.fromName("tag1"), TagEntity.fromName("tag2")))
                         .build())
                 .build());
 
