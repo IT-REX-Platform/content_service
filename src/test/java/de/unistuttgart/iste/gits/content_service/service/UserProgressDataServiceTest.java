@@ -2,17 +2,17 @@ package de.unistuttgart.iste.gits.content_service.service;
 
 import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
 import de.unistuttgart.iste.gits.content_service.TestData;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.AssessmentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ProgressLogItemEmbeddable;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataEntity;
+import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,13 +21,20 @@ import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserProgressDataServiceTest {
 
-    private final UserProgressDataRepository userProgressDataRepository = mock(UserProgressDataRepository.class);
-    private final ContentService contentService = mock(ContentService.class);
+    @Mock
+    private UserProgressDataRepository userProgressDataRepository;
+    @Mock
+    private ContentService contentService;
+    @Spy
+    private UserProgressDataMapper userProgressDataMapper = new UserProgressDataMapper(new ModelMapper());
+    @Mock
+    private TopicPublisher topicPublisher;
 
-    private final UserProgressDataService userProgressDataService = new UserProgressDataService(userProgressDataRepository,
-            contentService, new UserProgressDataMapper(new ModelMapper()));
+    @InjectMocks
+    private UserProgressDataService userProgressDataService;
 
     /**
      * Given progress data exists for the user and content
@@ -171,6 +178,8 @@ class UserProgressDataServiceTest {
                                         .build()))
                         .build()
         );
+
+        verify(topicPublisher).forwardContentProgressed(event);
     }
 
     /**

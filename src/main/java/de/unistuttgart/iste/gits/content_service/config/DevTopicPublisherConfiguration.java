@@ -1,15 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.config;
 
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
-import java.util.List;
-import java.util.UUID;
+import org.springframework.context.annotation.*;
 
 @Configuration
 @Profile("!prod")
@@ -30,18 +23,8 @@ public class DevTopicPublisherConfiguration {
         }
 
         @Override
-        public void notifyChange(ContentEntity contentEntity, CrudOperation operation) {
-            log.info("notifyChange called with {} and {}", contentEntity, operation);
-        }
-
-        @Override
-        public void forwardChange(UUID resourceId, List<UUID> chapterIds, CrudOperation operation) {
-            log.info("forwardChange called with {}, {} and {}", resourceId, chapterIds, operation);
-        }
-
-        @Override
-        public void informContentDependentServices(List<UUID> contentEntityIds, CrudOperation operation) {
-            log.info("informContentDependentServices called with {} and {}", contentEntityIds, operation);
+        protected void publishEvent(Object dto, String topic) {
+            log.info("Would have published message to topic {}: {}", topic, dto);
         }
     }
 }

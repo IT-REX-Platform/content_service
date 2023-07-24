@@ -1,9 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
 import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.AssessmentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataEntity;
+import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import de.unistuttgart.iste.gits.generated.dto.UserProgressData;
@@ -23,6 +22,7 @@ public class UserProgressDataService {
     private final UserProgressDataRepository userProgressDataRepository;
     private final ContentService contentService;
     private final UserProgressDataMapper userProgressDataMapper;
+    private final TopicPublisher topicPublisher;
 
     /**
      * Returns the user progress data for the given user and content.
@@ -58,8 +58,17 @@ public class UserProgressDataService {
         return userProgressDataRepository.save(userProgressDataEntity);
     }
 
+    /**
+     * Logs user progress according to the given event.
+     * The learning interval of the user progress data entity will be updated.
+     * A new progress log item will be added to the progress log.
+     * The event will be forwarded to the topic "user-progress-updated".
+     *
+     * @param userProgressLogEvent the event to log
+     */
     public void logUserProgress(UserProgressLogEvent userProgressLogEvent) {
-        UserProgressDataEntity userProgressDataEntity = getUserProgressDataEntity(userProgressLogEvent.getUserId(), userProgressLogEvent.getContentId());
+        UserProgressDataEntity userProgressDataEntity = getUserProgressDataEntity(
+                userProgressLogEvent.getUserId(), userProgressLogEvent.getContentId());
 
         userProgressDataEntity.setLearningInterval(
                 calculateNewLearningInterval(userProgressLogEvent, userProgressDataEntity));
@@ -68,6 +77,8 @@ public class UserProgressDataService {
         userProgressDataEntity.getProgressLog().add(logItem);
 
         userProgressDataRepository.save(userProgressDataEntity);
+
+        topicPublisher.forwardContentProgressed(userProgressLogEvent);
     }
 
     /**
