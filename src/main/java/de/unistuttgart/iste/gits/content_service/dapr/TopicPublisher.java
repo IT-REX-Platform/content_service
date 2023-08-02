@@ -21,6 +21,7 @@ public class TopicPublisher {
     private static final String TOPIC_RESOURCE_ASSOCIATION = "resource-association";
 
     private static final String TOPIC_CONTENT_CHANGES = "content-changes";
+    private static final String USER_PROGRESS_UPDATED = "user-progress-updated";
 
     private final DaprClient client;
 
@@ -86,7 +87,7 @@ public class TopicPublisher {
      * @param event the event to forward
      */
     public void forwardContentProgressed(UserProgressLogEvent event) {
-        publishEvent(event, "user-progress-updated");
+        publishEvent(event, USER_PROGRESS_UPDATED);
     }
 
 }
