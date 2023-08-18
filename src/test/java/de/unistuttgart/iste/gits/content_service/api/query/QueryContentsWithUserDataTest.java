@@ -3,18 +3,14 @@ package de.unistuttgart.iste.gits.content_service.api.query;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.MediaContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ProgressLogItemEmbeddable;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.UserProgressDataEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,6 +94,10 @@ class QueryContentsWithUserDataTest {
                             userProgressData {
                                 userId
                                 learningInterval
+                                lastLearnDate
+                                nextLearnDate
+                                isLearned
+                                isDueForReview
                                 log {
                                     timestamp
                                     success
@@ -119,6 +119,12 @@ class QueryContentsWithUserDataTest {
                 .path("contents.elements[0].metadata.chapterId").entity(UUID.class).isEqualTo(chapterId)
                 .path("contents.elements[0].userProgressData.userId").entity(UUID.class).isEqualTo(userId1)
                 .path("contents.elements[0].userProgressData.learningInterval").entity(Integer.class).isEqualTo(1)
+                .path("contents.elements[0].userProgressData.lastLearnDate").entity(OffsetDateTime.class)
+                .matches(lastLearnDate -> lastLearnDate.isEqual(OffsetDateTime.parse("2021-01-01T00:00:00+01:00")))
+                .path("contents.elements[0].userProgressData.nextLearnDate").entity(OffsetDateTime.class)
+                .matches(nextLearnDate -> nextLearnDate.isEqual(OffsetDateTime.parse("2021-01-02T00:00:00+01:00")))
+                .path("contents.elements[0].userProgressData.isLearned").entity(Boolean.class).isEqualTo(true)
+                .path("contents.elements[0].userProgressData.isDueForReview").entity(Boolean.class).isEqualTo(true)
                 .path("contents.elements[0].userProgressData.log[0].timestamp").entity(OffsetDateTime.class).satisfies(
                         offsetDateTime -> assertThat(
                                 offsetDateTime.isEqual(OffsetDateTime.of(2021, 1, 2, 0, 0, 0, 0, ZoneOffset.ofHours(1))),

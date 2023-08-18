@@ -28,10 +28,18 @@ type UserProgressData {
     """
     nextLearnDate: DateTime
     """
-    The last time the content was learned.
+    The last time the content was learned successfully.
     This is null if the user has not completed the content item once.
     """
     lastLearnDate: DateTime
+    """
+    True if the user has completed the content item at least once successfully.
+    """
+    isLearned: Boolean!
+    """
+    True if the assessment is due for review.
+    """
+    isDueForReview: Boolean!
 }
 
 type ProgressLogItem {
