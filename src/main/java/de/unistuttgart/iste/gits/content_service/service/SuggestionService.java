@@ -30,6 +30,16 @@ public class SuggestionService {
     /**
      * Creates {@link Suggestion}s for the given chapter IDs and user ID. The suggestions are created based on the
      * user's progress and the given skill types.
+     * <p>
+     * The suggested contents are prioritized as follows:
+     * <ol>
+     *     <li>Required contents are always suggested before optional contents.</li>
+     *     <li>How many days are left until the suggested date or the next learn date (depending on whether the user
+     *     has already learned the content) is considered. The content with the lowest number is suggested first,
+     *     which might be negative if the content is already overdue.</li>
+     *     <li>New contents are suggested before repetitions.</li>
+     *     <li>Contents with more reward points are suggested before contents with less reward points.</li>
+     * </ol>
      *
      * @param chapterIds the IDs of the chapters for which suggestions should be created.
      * @param userId     the ID of the user for which suggestions should be created.
@@ -48,18 +58,28 @@ public class SuggestionService {
                 .flatMap(section -> getAvailableStagesOfSection(section, userId).stream())
                 .toList();
 
-        return Stream.concat(
-                        availableStages.stream().flatMap(stage -> stage.getRequiredContents().stream()),
-                        availableStages.stream().flatMap(stage -> stage.getOptionalContents().stream()))
+        Stream<Content> requiredContents = availableStages.stream().flatMap(stage -> stage.getRequiredContents().stream());
+        Stream<Content> optionalContents = availableStages.stream().flatMap(stage -> stage.getOptionalContents().stream());
 
+        return Stream.concat(
+                        filterAndSort(requiredContents, userId, skillTypes),
+                        filterAndSort(optionalContents, userId, skillTypes))
+                .limit(amount)
+                .map(content -> createSuggestion(content, getUserProgressData(userId, content.getId())))
+                .toList();
+    }
+
+    /**
+     * Filters the given contents by the given skill types and sorts them according to the prioritization described
+     * in {@link SuggestionService#createSuggestions(List, UUID, int, List)}.
+     */
+    private Stream<Content> filterAndSort(Stream<Content> contents, UUID userId, List<SkillType> skillTypes) {
+        return contents
                 .filter(content -> hasCorrectSkillType(content, skillTypes))
                 // sort by due date for new contents and next learn date for repetitions
                 .sorted(comparing((Content content) -> Duration.between(now(), getRelevantLearnDate(content, userId)).toDays())
                         .thenComparing(content -> getUserProgressData(userId, content.getId()).getIsLearned())
-                        .thenComparing(content -> content.getMetadata().getRewardPoints(), reverseOrder()))
-                .limit(amount)
-                .map(content -> createSuggestion(content, getUserProgressData(userId, content.getId())))
-                .toList();
+                        .thenComparing(content -> content.getMetadata().getRewardPoints(), reverseOrder()));
     }
 
     /**

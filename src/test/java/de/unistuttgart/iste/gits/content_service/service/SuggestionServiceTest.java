@@ -70,9 +70,9 @@ class SuggestionServiceTest {
                                                 contentWithSuggestedDate(now().plusDays(1), "plus1"),
                                                 contentWithSuggestedDate(now().minusDays(2), "minus2"),
                                                 contentWithSuggestedDate(now().minusDays(1), "minus1"),
-                                                contentWithSuggestedDate(now().plusDays(2), "plus2")))
-                                .setOptionalContents(List.of(
-                                        contentWithSuggestedDate(now().minusDays(5), "minus5")))
+                                                contentWithSuggestedDate(now().plusDays(2), "plus2"),
+                                                contentWithSuggestedDate(now().minusDays(5), "minus5")))
+                                .setOptionalContents(List.of())
                                 .build()))
                 .build();
 
@@ -116,11 +116,11 @@ class SuggestionServiceTest {
                         Stage.builder()
                                 .setRequiredContents(
                                         List.of(
+                                                contentWithSuggestedDate(now().minusDays(10), "minus5"),
                                                 contentWithSuggestedDate(now().minusDays(10), "minus2"),
                                                 contentWithSuggestedDate(now().minusDays(10), "minus1"),
                                                 contentWithSuggestedDate(now().minusDays(10), "plus2")))
-                                .setOptionalContents(List.of(
-                                        contentWithSuggestedDate(now().minusDays(10), "minus5")))
+                                .setOptionalContents(List.of())
                                 .build()))
                 .build();
 
@@ -131,10 +131,10 @@ class SuggestionServiceTest {
         UserProgressData progressDataMinus1 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(1)).build();
         UserProgressData progressDataPlus2 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().plusDays(2)).build();
 
-        UUID contentIdMinus5 = section.getStages().get(0).getOptionalContents().get(0).getId();
-        UUID contentIdMinus2 = section.getStages().get(0).getRequiredContents().get(0).getId();
-        UUID contentIdMinus1 = section.getStages().get(0).getRequiredContents().get(1).getId();
-        UUID contentIdPlus2 = section.getStages().get(0).getRequiredContents().get(2).getId();
+        UUID contentIdMinus5 = section.getStages().get(0).getRequiredContents().get(0).getId();
+        UUID contentIdMinus2 = section.getStages().get(0).getRequiredContents().get(1).getId();
+        UUID contentIdMinus1 = section.getStages().get(0).getRequiredContents().get(2).getId();
+        UUID contentIdPlus2 = section.getStages().get(0).getRequiredContents().get(3).getId();
 
         doReturn(progressDataMinus5).when(userProgressDataService).getUserProgressData(userId, contentIdMinus5);
         doReturn(progressDataMinus2).when(userProgressDataService).getUserProgressData(userId, contentIdMinus2);
@@ -156,6 +156,51 @@ class SuggestionServiceTest {
         verify(userProgressDataService).getUserProgressData(userId, contentIdMinus2);
         verify(userProgressDataService).getUserProgressData(userId, contentIdMinus1);
         verify(userProgressDataService).getUserProgressData(userId, contentIdPlus2);
+    }
+
+    /**
+     * Given optional and required contents
+     * When the user requests suggestions
+     * Then the required contents should be preferred, even if they are due later
+     */
+    @Test
+    void testOptionalContentLast() {
+        // Arrange
+        List<UUID> chapterIds = List.of(UUID.randomUUID());
+        UUID userId = UUID.randomUUID();
+
+        Section section = Section.builder()
+                .setChapterId(chapterIds.get(0))
+                .setStages(List.of(
+                        Stage.builder()
+                                .setRequiredContents(
+                                        List.of(
+                                                contentWithSuggestedDate(now().plusDays(1), "plus1"),
+                                                contentWithSuggestedDate(now().plusDays(2), "plus2")))
+                                .setOptionalContents(List.of(
+                                        contentWithSuggestedDate(now().minusDays(2), "minus2"),
+                                        contentWithSuggestedDate(now().minusDays(1), "minus1")))
+                                .build()))
+                .build();
+
+        doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
+
+        UserProgressData userProgressData = UserProgressData.builder().setIsLearned(false).build();
+
+        doReturn(userProgressData).when(userProgressDataService).getUserProgressData(any(), any());
+
+        // Act
+        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of());
+
+        // Assert
+        assertThat(actual.get(0).getContent().getMetadata().getName(), is("plus1"));
+        assertThat(actual.get(1).getContent().getMetadata().getName(), is("plus2"));
+        assertThat(actual.get(2).getContent().getMetadata().getName(), is("minus2"));
+        assertThat(actual, hasSize(3));
+
+        // Verify
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(any(), any());
+        verify(sectionService).getSectionsByChapterIds(chapterIds);
     }
 
     /**
