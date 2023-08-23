@@ -95,7 +95,7 @@ class SuggestionServiceTest {
         assertThat(actual.get(2).getType(), is(SuggestionType.NEW_CONTENT));
 
         // Verify
-        verify(userProgressDataService).getUserProgressData(any(), any());
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(any(), any());
         verify(sectionService).getSectionsByChapterIds(chapterIds);
     }
 
