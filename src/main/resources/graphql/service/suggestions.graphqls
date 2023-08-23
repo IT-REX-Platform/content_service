@@ -1,0 +1,18 @@
+"""
+Represents a suggestion for a user to learn new content or review old content.
+"""
+type Suggestion {
+    """
+    The content that is suggested to the user.
+    """
+    content: Content!
+    """
+    The type of suggestion.
+    """
+    type: SuggestionType!
+}
+
+enum SuggestionType {
+    NEW_CONTENT
+    REPETITION
+}

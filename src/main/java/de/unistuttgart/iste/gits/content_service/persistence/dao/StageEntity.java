@@ -2,10 +2,7 @@ package de.unistuttgart.iste.gits.content_service.persistence.dao;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 import java.util.UUID;
@@ -27,9 +24,9 @@ public class StageEntity {
     @Column(nullable = false)
     private int position;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     Set<ContentEntity> requiredContents;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     Set<ContentEntity> optionalContent;
 }

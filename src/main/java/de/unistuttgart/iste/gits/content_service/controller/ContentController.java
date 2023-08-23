@@ -1,8 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
-import de.unistuttgart.iste.gits.content_service.service.ContentService;
-import de.unistuttgart.iste.gits.content_service.service.UserProgressDataService;
+import de.unistuttgart.iste.gits.content_service.service.*;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ public class ContentController {
 
     private final ContentService contentService;
     private final UserProgressDataService userProgressDataService;
+    private final SuggestionService suggestionService;
 
     @QueryMapping
     public ContentPayload contents() {
@@ -36,7 +36,15 @@ public class ContentController {
     }
 
     @QueryMapping
-    List<List<Content>> contentsByChapterIds(@Argument List<UUID> chapterIds) {
+    public List<Suggestion> suggestionsByChapterIds(@Argument List<UUID> chapterIds,
+                                                    @Argument int amount,
+                                                    @Argument List<SkillType> skillTypes,
+                                                    @ContextValue LoggedInUser currentUser) {
+        return suggestionService.createSuggestions(chapterIds, currentUser.getId(), amount, skillTypes);
+    }
+
+    @QueryMapping
+    public List<List<Content>> contentsByChapterIds(@Argument List<UUID> chapterIds) {
         return contentService.getContentsByChapterIds(chapterIds);
     }
 

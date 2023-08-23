@@ -24,6 +24,28 @@ type Query {
     """
     sectionsByChapterIds(chapterIds: [UUID!]!): [[Section!]!]!
 
+    """
+    Generates user specific suggestions for multiple chapters.
+
+    Only content that the user can access will be considered.
+    The contents will be ranked by suggested date, with the most overdue or most urgent content first.
+    """
+    suggestionsByChapterIds(
+        """
+        The ids of the chapters for which suggestions should be generated.
+        """
+        chapterIds: [UUID!]!,
+        """
+        The amount of suggestions to generate in total.
+        """
+        amount: Int!,
+        """
+        Only suggestions for these skill types will be generated.
+        If no skill types are given, suggestions for all skill types will be generated,
+        also containing suggestions for media content (which do not have a skill type).
+        """
+        skillTypes: [SkillType!]! = []): [Suggestion!]!
+
 }
 
 type ContentPayload {

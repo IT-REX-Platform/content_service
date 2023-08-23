@@ -1,22 +1,15 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.StageEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.SectionEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.StageMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
 import de.unistuttgart.iste.gits.generated.dto.UpdateStageInput;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -87,8 +80,8 @@ public class StageService {
      * If Content is not part of the same chapter, the content is removed
      *
      * @param chapterId  chapter ID of the Section / Stage
-     * @param contentIds
-     * @return
+     * @param contentIds List of Content IDs to be validated
+     * @return Set of validated Content Entities
      */
     private Set<ContentEntity> validateStageContent(UUID chapterId, List<UUID> contentIds) {
 
@@ -155,7 +148,7 @@ public class StageService {
      */
     private void requireSectionExisting(UUID uuid) {
         if (uuid == null) {
-            throw new NullPointerException("Section must be not nulL!");
+            throw new NullPointerException("Section must be not null!");
         }
         if (!sectionRepository.existsById(uuid)) {
             throw new EntityNotFoundException("Section with id " + uuid + " not found");

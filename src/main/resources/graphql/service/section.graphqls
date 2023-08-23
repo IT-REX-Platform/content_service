@@ -27,7 +27,7 @@ type Section {
 """
 Representation of a Stage
 """
-type Stage{
+type Stage {
 
     """
     Unique identifier of the Stage Object
