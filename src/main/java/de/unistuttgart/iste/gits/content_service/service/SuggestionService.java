@@ -34,6 +34,7 @@ public class SuggestionService {
      * The suggested contents are prioritized as follows:
      * <ol>
      *     <li>Required contents are always suggested before optional contents.</li>
+     *     <li>Only contents that are not learned or due for review are considered.</li>
      *     <li>How many days are left until the suggested date or the next learn date (depending on whether the user
      *     has already learned the content) is considered. The content with the lowest number is suggested first,
      *     which might be negative if the content is already overdue.</li>
@@ -75,6 +76,7 @@ public class SuggestionService {
      */
     private Stream<Content> filterAndSort(Stream<Content> contents, UUID userId, List<SkillType> skillTypes) {
         return contents
+                .filter(content -> isNewOrDueForReview(content, userId))
                 .filter(content -> hasCorrectSkillType(content, skillTypes))
                 // sort by due date for new contents and next learn date for repetitions
                 .sorted(comparing((Content content) -> Duration.between(now(), getRelevantLearnDate(content, userId)).toDays())
@@ -94,6 +96,11 @@ public class SuggestionService {
         }
 
         return content.getMetadata().getSuggestedDate();
+    }
+
+    private boolean isNewOrDueForReview(Content content, UUID userId) {
+        UserProgressData userProgressData = getUserProgressData(userId, content.getId());
+        return !userProgressData.getIsLearned() || userProgressData.getIsDueForReview();
     }
 
     private Suggestion createSuggestion(Content content, UserProgressData userProgressData) {

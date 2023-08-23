@@ -126,10 +126,26 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataMinus5 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(5)).build();
-        UserProgressData progressDataMinus2 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(2)).build();
-        UserProgressData progressDataMinus1 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(1)).build();
-        UserProgressData progressDataPlus2 = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().plusDays(2)).build();
+        UserProgressData progressDataMinus5 = UserProgressData.builder()
+                .setIsLearned(true)
+                .setIsDueForReview(true)
+                .setNextLearnDate(now().minusDays(5))
+                .build();
+        UserProgressData progressDataMinus2 = UserProgressData.builder()
+                .setIsLearned(true)
+                .setIsDueForReview(true)
+                .setNextLearnDate(now().minusDays(2))
+                .build();
+        UserProgressData progressDataMinus1 = UserProgressData.builder()
+                .setIsLearned(true)
+                .setIsDueForReview(true)
+                .setNextLearnDate(now().minusDays(1))
+                .build();
+        UserProgressData progressDataPlus2 = UserProgressData.builder()
+                .setIsLearned(true)
+                .setIsDueForReview(true)
+                .setNextLearnDate(now().plusDays(2)).
+                build();
 
         UUID contentIdMinus5 = section.getStages().get(0).getRequiredContents().get(0).getId();
         UUID contentIdMinus2 = section.getStages().get(0).getRequiredContents().get(1).getId();
@@ -145,9 +161,9 @@ class SuggestionServiceTest {
         List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
 
         // Assert
+        assertThat(actual, hasSize(2));
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("minus5"));
         assertThat(actual.get(1).getContent().getMetadata().getName(), is("minus2"));
-        assertThat(actual, hasSize(2));
         assertThat(actual.get(0).getType(), is(SuggestionType.REPETITION));
         assertThat(actual.get(1).getType(), is(SuggestionType.REPETITION));
 
@@ -156,6 +172,49 @@ class SuggestionServiceTest {
         verify(userProgressDataService).getUserProgressData(userId, contentIdMinus2);
         verify(userProgressDataService).getUserProgressData(userId, contentIdMinus1);
         verify(userProgressDataService).getUserProgressData(userId, contentIdPlus2);
+    }
+
+    /**
+     * Given two contents that are due for repetition
+     * When the user requests suggestions
+     * Then the contents are not considered
+     */
+    @Test
+    void testContentNotDueForRepetitionIsNotConsidered() {
+        // Arrange
+        List<UUID> chapterIds = List.of(UUID.randomUUID());
+        UUID userId = UUID.randomUUID();
+
+        Section section = Section.builder()
+                .setChapterId(chapterIds.get(0))
+                .setStages(List.of(
+                        Stage.builder()
+                                .setRequiredContents(
+                                        List.of(
+                                                contentWithSuggestedDate(now().minusDays(10), "minus5"),
+                                                contentWithSuggestedDate(now().minusDays(10), "minus2")))
+                                .setOptionalContents(List.of())
+                                .build()))
+                .build();
+
+        doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
+
+        UserProgressData progressNotDueForRepetition = UserProgressData.builder()
+                .setIsLearned(true)
+                .setIsDueForReview(false)
+                .setNextLearnDate(now().plusDays(1))
+                .build();
+
+        doReturn(progressNotDueForRepetition).when(userProgressDataService).getUserProgressData(any(), any());
+
+        // Act
+        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
+
+        // Assert
+        assertThat(actual, is(empty()));
+
+        // Verify
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(any(), any());
     }
 
     /**
@@ -337,7 +396,7 @@ class SuggestionServiceTest {
         assertThat(actual, hasSize(1));
 
         // Verify
-        verify(userProgressDataService, times(1)).getUserProgressData(eq(userId), any());
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(eq(userId), any());
         verify(sectionService).getSectionsByChapterIds(chapterIds);
     }
 
