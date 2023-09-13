@@ -10,6 +10,7 @@ import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentR
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
+import de.unistuttgart.iste.gits.generated.dto.CreateStageInput;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
 import de.unistuttgart.iste.gits.generated.dto.UpdateStageInput;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,7 +42,9 @@ class StageServiceTest {
 
     @Test
     void createNewStageTest() {
-        SectionEntity sectionEntity = SectionEntity.builder().id(UUID.randomUUID()).name("Test Work-Path").stages(new HashSet<>()).chapterId(UUID.randomUUID()).build();
+        CreateStageInput stageInput = CreateStageInput.builder().setOptionalContents(new ArrayList<>()).setRequiredContents(new ArrayList<>()).build();
+
+        SectionEntity sectionEntity = SectionEntity.builder().id(UUID.randomUUID()).name("Test Section").stages(new HashSet<>()).chapterId(UUID.randomUUID()).build();
 
         StageEntity stageEntity = StageEntity.builder().sectionId(sectionEntity.getId()).position(0).optionalContents(new HashSet<>()).requiredContents(new HashSet<>()).build();
 
@@ -52,7 +55,7 @@ class StageServiceTest {
 
 
         //execute method under test
-        Stage result = stageService.createNewStage(sectionEntity.getId());
+        Stage result = stageService.createNewStage(sectionEntity.getId(), stageInput);
 
         assertEquals(0, result.getPosition());
         assertTrue(result.getRequiredContents().isEmpty());
@@ -61,15 +64,71 @@ class StageServiceTest {
     }
 
     @Test
-    void createNewStageWithInvalidSectionId(){
-        UUID id = UUID.randomUUID();
+    void createNewStageTestWithContent() {
+        UUID chapterId = UUID.randomUUID();
+        List<ContentEntity> expectedReqContents = List.of(
+                buildContentEntity(chapterId),
+                buildContentEntity(chapterId));
+        List<ContentEntity> expectedOptContents = List.of(
+                buildContentEntity(chapterId),
+                buildContentEntity(chapterId)
+        );
 
-        SectionEntity sectionEntity = SectionEntity.builder().id(id).name("Test Work-Path").stages(new HashSet<>()).chapterId(UUID.randomUUID()).build();
+        CreateStageInput stageInput = CreateStageInput.builder()
+                .setRequiredContents(
+                        expectedReqContents.stream()
+                                .map(content -> content.getId())
+                                .toList()
+                ).setOptionalContents(
+                        expectedOptContents.stream()
+                                .map(content -> content.getId())
+                                .toList()
+                ).build();
+
+        SectionEntity sectionEntity = SectionEntity.builder()
+                .id(UUID.randomUUID())
+                .name("Test Section")
+                .stages(new HashSet<>())
+                .chapterId(chapterId)
+                .build();
+
+        StageEntity stageEntity = StageEntity.builder()
+                .sectionId(sectionEntity.getId())
+                .position(0)
+                .requiredContents(Set.copyOf(expectedReqContents))
+                .optionalContents(Set.copyOf(expectedOptContents))
+                .build();
+
+        //mock repository
+        when(sectionRepository.existsById(sectionEntity.getId())).thenReturn(true);
+        when(sectionRepository.getReferenceById(sectionEntity.getId())).thenReturn(sectionEntity);
+        when(sectionRepository.existsById(any())).thenReturn(true);
+        when(contentRepository.findContentEntitiesByIdIn(stageInput.getRequiredContents())).thenReturn(expectedReqContents);
+        when(contentRepository.findContentEntitiesByIdIn(stageInput.getOptionalContents())).thenReturn(expectedOptContents);
+        when(stageRepository.save(any())).thenReturn(stageEntity);
+
+
+        //execute method under test
+        Stage result = stageService.createNewStage(sectionEntity.getId(), stageInput);
+
+        assertEquals(0, result.getPosition());
+        assertEquals(2, result.getRequiredContents().size());
+        assertEquals(2, result.getOptionalContents().size());
+
+    }
+
+    @Test
+    void createNewStageWithInvalidSectionId() {
+        UUID id = UUID.randomUUID();
+        CreateStageInput stageInput = CreateStageInput.builder().setOptionalContents(new ArrayList<>()).setRequiredContents(new ArrayList<>()).build();
+
+
+        SectionEntity sectionEntity = SectionEntity.builder().id(id).name("Test Section").stages(new HashSet<>()).chapterId(UUID.randomUUID()).build();
 
         when(sectionRepository.existsById(sectionEntity.getId())).thenReturn(false);
 
-        assertThrows(EntityNotFoundException.class, () -> stageService.createNewStage(id));
-        assertThrows(NullPointerException.class, () -> stageService.createNewStage(null));
+        assertThrows(EntityNotFoundException.class, () -> stageService.createNewStage(id, stageInput));
+        assertThrows(NullPointerException.class, () -> stageService.createNewStage(null, stageInput));
     }
 
     @Test

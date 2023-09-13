@@ -38,10 +38,13 @@ class MutationAddTagToContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
-                    addTagToContent(contentId: $contentId, tagName: $tagName) {
-                        id
-                        metadata { tagNames }
+                    mutateContent(contentId: $contentId){
+                        addTagToContent(tagName: $tagName) {
+                            id
+                            metadata { tagNames }
+                        }
                     }
+                    
                 }
                 """;
 
@@ -49,8 +52,8 @@ class MutationAddTagToContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("tagName", "tag")
                 .execute()
-                .path("addTagToContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
-                .path("addTagToContent.metadata.tagNames").entityList(String.class).containsExactly("tag");
+                .path("mutateContent.addTagToContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
+                .path("mutateContent.addTagToContent.metadata.tagNames").entityList(String.class).containsExactly("tag");
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(1));
@@ -74,10 +77,13 @@ class MutationAddTagToContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
-                    addTagToContent(contentId: $contentId, tagName: $tagName) {
-                        id
-                        metadata { tagNames }
+                    mutateContent(contentId: $contentId){
+                        addTagToContent(tagName: $tagName) {
+                            id
+                            metadata { tagNames }
+                        }
                     }
+                    
                 }
                 """;
 
@@ -85,8 +91,8 @@ class MutationAddTagToContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("tagName", "tag2")
                 .execute()
-                .path("addTagToContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
-                .path("addTagToContent.metadata.tagNames")
+                .path("mutateContent.addTagToContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
+                .path("mutateContent.addTagToContent.metadata.tagNames")
                 .entityList(String.class)
                 .hasSize(2)
                 .contains("tag1", "tag2");
@@ -113,10 +119,13 @@ class MutationAddTagToContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
-                    addTagToContent(contentId: $contentId, tagName: $tagName) {
-                        id
-                        metadata { tagNames }
+                    mutateContent(contentId: $contentId){
+                        addTagToContent(tagName: $tagName) {
+                            id
+                            metadata { tagNames }
+                        }
                     }
+                    
                 }
                 """;
 
@@ -124,7 +133,7 @@ class MutationAddTagToContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("tagName", "tag")
                 .execute()
-                .path("addTagToContent.metadata.tagNames")
+                .path("mutateContent.addTagToContent.metadata.tagNames")
                 .entityList(String.class).hasSize(1).containsExactly("tag");
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();

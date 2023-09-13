@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.OffsetDateTime.now;
@@ -166,7 +167,13 @@ public class SuggestionService {
             return false;
         }
 
-        return skillTypes.contains(assessment.getAssessmentMetadata().getSkillType());
+        // check if assessment contains one of the given skill types
+        Set<SkillType> intersection = assessment.getAssessmentMetadata()
+                .getSkillTypes()
+                .stream().filter(skillTypes::contains)
+                .collect(Collectors.toSet());
+
+        return !intersection.isEmpty();
     }
 
 }

@@ -47,10 +47,13 @@ class MutationRemoveTagFromContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
-                    removeTagFromContent(contentId: $contentId, tagName: $tagName) {
-                        id
-                        metadata { tagNames }
+                    mutateContent(contentId: $contentId){
+                        removeTagFromContent(tagName: $tagName) {
+                            id
+                            metadata { tagNames }
+                        }
                     }
+                    
                 }
                 """;
 
@@ -58,8 +61,8 @@ class MutationRemoveTagFromContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("tagName", "tag1")
                 .execute()
-                .path("removeTagFromContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
-                .path("removeTagFromContent.metadata.tagNames")
+                .path("mutateContent.removeTagFromContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
+                .path("mutateContent.removeTagFromContent.metadata.tagNames")
                 .entityList(String.class)
                 .hasSize(1)
                 .contains("tag2");
@@ -91,10 +94,13 @@ class MutationRemoveTagFromContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
-                    removeTagFromContent(contentId: $contentId, tagName: $tagName) {
-                        id
-                        metadata { tagNames }
+                    mutateContent(contentId: $contentId){
+                        removeTagFromContent(tagName: $tagName) {
+                            id
+                            metadata { tagNames }
+                        }
                     }
+                    
                 }
                 """;
 
@@ -102,8 +108,8 @@ class MutationRemoveTagFromContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("tagName", "nonExistingTag")
                 .execute()
-                .path("removeTagFromContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
-                .path("removeTagFromContent.metadata.tagNames")
+                .path("mutateContent.removeTagFromContent.id").entity(UUID.class).isEqualTo(contentEntity.getId())
+                .path("mutateContent.removeTagFromContent.metadata.tagNames")
                 .entityList(String.class)
                 .hasSize(2)
                 .contains("tag1", "tag2");

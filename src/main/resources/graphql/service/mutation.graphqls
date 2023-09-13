@@ -3,54 +3,83 @@ type Mutation {
     Create new media content
     """
     createMediaContent(input: CreateMediaContentInput!): MediaContent!
+
+    """
+    Create a new Assessment
+    """
+    createAssessment(input: CreateAssessmentInput!): Assessment!
+
+    """
+    Modify Content
+    """
+    mutateContent(contentId: UUID!): ContentMutation!
+
+    """
+    Create new Section
+    """
+    createSection(input: CreateSectionInput!): Section!
+
+    """
+    Modify Sections
+    """
+    mutateSection(sectionId: UUID!): SectionMutation!
+
+}
+
+type ContentMutation{
+
+    """
+    Identifier of Content
+    """
+    contentId: UUID!
+
     """
     Update an existing Content
     """
     updateMediaContent(input: UpdateMediaContentInput!): MediaContent!
 
     """
-    Create a new Assessment
-    """
-    createAssessment(input: CreateAssessmentInput!): Assessment!
-    """
     Update an existing Assessment
     """
     updateAssessment(input: UpdateAssessmentInput!): Assessment!
 
-
     """
     Delete an existing Content, throws an error if no Content with the given id exists
     """
-    deleteContent(id: UUID!): UUID!
+    deleteContent: UUID!
 
     """
     Add a tag to an existing content
     """
-    addTagToContent(contentId: UUID!, tagName: String): Content!
+    addTagToContent(tagName: String): Content!
+
     """
     Remove a tag from an existing content
     """
-    removeTagFromContent(contentId: UUID!, tagName: String): Content!
+    removeTagFromContent(tagName: String): Content!
+
+}
+
+type SectionMutation {
 
     """
-    create new Section
+    Identifier of the section
     """
-    createSection(input: CreateSectionInput!): Section!
-
+    sectionId: UUID!
     """
     update the name of a Section
     """
-    updateSection(input: UpdateSectionInput!): Section!
+    updateSectionName(name: String!): Section!
 
     """
     delete a Section by ID
     """
-    deleteSection(id: UUID!): UUID!
+    deleteSection: UUID!
 
     """
     create new Stage in Section
     """
-    createStage(sectionId: UUID!): Stage!
+    createStage(input: CreateStageInput): Stage!
 
     """
     Update Content of Stage
@@ -65,7 +94,7 @@ type Mutation {
     """
     update Order of Stages within a Section
     """
-    updateStageOrder(input: StageOrderInput!):Section!
+    updateStageOrder(stages: [UUID!]!):Section!
 }
 
 """
@@ -79,10 +108,6 @@ input CreateMediaContentInput {
 }
 
 input UpdateMediaContentInput {
-    """
-    ID of the Content to update
-    """
-    id: UUID!
     """
     Metadata for the new Content
     """
@@ -101,10 +126,6 @@ input CreateAssessmentInput {
 }
 
 input UpdateAssessmentInput {
-    """
-    ID of the Content to update
-    """
-    id: UUID!
     """
     Metadata for the new Content
     """
@@ -173,7 +194,7 @@ input AssessmentMetadataInput {
     """
     Type of the assessment
     """
-    skillType: SkillType!
+    skillTypes: [SkillType!]!
     """
     The initial learning interval for the assessment in days.
     This is the interval that is applied after the assessment is completed the first time.
@@ -196,17 +217,18 @@ input CreateSectionInput {
     name: String!
 }
 
-input UpdateSectionInput {
+
+input CreateStageInput{
 
     """
-    Identifier of the Section
+    updated List of UUIDs for content labeled as required in this Stage
     """
-    id: UUID!
+    requiredContents: [UUID!]!
 
     """
-    new name of the Section
+    updated List of UUIDs for content labeled as optional in this Stage
     """
-    name: String!
+    optionalContents: [UUID!]!
 }
 
 input UpdateStageInput{
@@ -227,15 +249,3 @@ input UpdateStageInput{
     optionalContents: [UUID!]!
 }
 
-input StageOrderInput{
-
-    """
-    Identifier of target Section
-    """
-    sectionId: UUID!
-
-    """
-    new position of all stages determined by their position in the list
-    """
-    stageIds: [UUID!]!
-}

@@ -7,6 +7,7 @@ import de.unistuttgart.iste.gits.content_service.persistence.mapper.StageMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
+import de.unistuttgart.iste.gits.generated.dto.CreateStageInput;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
 import de.unistuttgart.iste.gits.generated.dto.UpdateStageInput;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,7 +34,7 @@ public class StageService {
      * @param sectionId Section ID the Stage belongs to
      * @return created Stage
      */
-    public Stage createNewStage(UUID sectionId) {
+    public Stage createNewStage(UUID sectionId, CreateStageInput input) {
 
         requireSectionExisting(sectionId);
 
@@ -41,8 +42,14 @@ public class StageService {
         StageEntity stageEntity = StageEntity.builder()
                 .sectionId(sectionId)
                 .position(sectionEntity.getStages().size())
-                .requiredContents(new HashSet<>())
-                .optionalContents(new HashSet<>())
+                .requiredContents(validateStageContent(
+                        sectionEntity.getChapterId(),
+                        input.getRequiredContents()
+                ))
+                .optionalContents(validateStageContent(
+                        sectionEntity.getChapterId(),
+                        input.getOptionalContents()
+                ))
                 .build();
 
         return stageMapper.entityToDto(stageRepository.save(stageEntity));
@@ -63,7 +70,7 @@ public class StageService {
 
         requireSectionExisting(stageEntity.getSectionId());
 
-        // fetch Work Path, Stage belongs to
+        // fetch Section, Stage belongs to
         SectionEntity sectionEntity = sectionRepository.getReferenceById(stageEntity.getSectionId());
 
         // set updated Content

@@ -4,12 +4,15 @@ import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
+import de.unistuttgart.iste.gits.generated.dto.CreateStageInput;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,8 +24,11 @@ class MutationCreateStageTest {
     @Autowired
     private SectionRepository sectionRepository;
 
+
     @Test
-    void testStageCreation(GraphQlTester tester){
+    void testStageCreation(GraphQlTester tester) {
+        List<UUID> contentIds = new ArrayList<>();
+
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
                 .chapterId(UUID.randomUUID())
@@ -30,23 +36,32 @@ class MutationCreateStageTest {
                 .build();
         sectionEntity = sectionRepository.save(sectionEntity);
 
+        CreateStageInput stageInput = CreateStageInput.builder()
+                .setRequiredContents(contentIds)
+                .setOptionalContents(contentIds)
+                .build();
+
         String query = """
-                mutation {
-                createStage(sectionId: "%s") {
-                    id
-                    position
-                    requiredContents {
-                        id          
-                        }     
-                    optionalContents {
-                        id                    
-                        }           
+                mutation($id: UUID!, $input: CreateStageInput){
+                    mutateSection(sectionId: $id){
+                        createStage(input: $input) {
+                            id
+                            position
+                            requiredContents {
+                                id        
+                            }     
+                            optionalContents {
+                                id                    
+                            }           
                     }
                 }
-                """.formatted(sectionEntity.getId());
+                                
+                }
+                """;
         tester.document(query)
-                .execute()
-                .path("createStage")
+                .variable("id", sectionEntity.getId())
+                .variable("input", stageInput).execute()
+                .path("mutateSection.createStage")
                 .entity(Stage.class)
                 .satisfies( stage -> {
             assertEquals(0, stage.getPosition());

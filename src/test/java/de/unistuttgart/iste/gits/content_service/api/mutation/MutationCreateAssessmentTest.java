@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,7 +69,7 @@ class MutationCreateAssessmentTest {
                         }
                         assessmentMetadata: {
                             skillPoints: 1
-                            skillType: REMEMBER
+                            skillTypes: [REMEMBER]
                             initialLearningInterval: 2
                         }
                     }) {
@@ -83,7 +84,7 @@ class MutationCreateAssessmentTest {
                         }
                         assessmentMetadata {
                             skillPoints
-                            skillType
+                            skillTypes
                             initialLearningInterval
                         }
                     }
@@ -105,7 +106,7 @@ class MutationCreateAssessmentTest {
         assertThat(createdAssessment.getMetadata().getChapterId(), is(chapterId));
         assertThat(createdAssessment.getMetadata().getRewardPoints(), is(1));
         assertThat(createdAssessment.getAssessmentMetadata().getSkillPoints(), is(1));
-        assertThat(createdAssessment.getAssessmentMetadata().getSkillType(), is(SkillType.REMEMBER));
+        assertThat(createdAssessment.getAssessmentMetadata().getSkillTypes(), is(List.of(SkillType.REMEMBER)));
         assertThat(createdAssessment.getAssessmentMetadata().getInitialLearningInterval(), is(2));
 
         ContentEntity contentEntity = contentRepository.findById(createdAssessment.getId()).orElseThrow();
@@ -122,7 +123,7 @@ class MutationCreateAssessmentTest {
         assertThat(assessmentEntity.getMetadata().getChapterId(), is(chapterId));
         assertThat(assessmentEntity.getMetadata().getRewardPoints(), is(1));
         assertThat(assessmentEntity.getAssessmentMetadata().getSkillPoints(), is(1));
-        assertThat(assessmentEntity.getAssessmentMetadata().getSkillType(), is(SkillType.REMEMBER));
+        assertThat(assessmentEntity.getAssessmentMetadata().getSkillTypes(), is(List.of(SkillType.REMEMBER)));
         assertThat(assessmentEntity.getAssessmentMetadata().getInitialLearningInterval(), is(2));
 
         verify(topicPublisher, times(1))
@@ -150,7 +151,7 @@ class MutationCreateAssessmentTest {
                         }
                         assessmentMetadata: {
                             skillPoints: 1
-                            skillType: REMEMBER
+                            skillTypes: [REMEMBER]
                             initialLearningInterval: 1
                         }
                     }) { id }

@@ -209,12 +209,12 @@ public class ContentService {
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
-    public MediaContent updateMediaContent(UpdateMediaContentInput input) {
+    public MediaContent updateMediaContent(UUID contentId, UpdateMediaContentInput input) {
         contentValidator.validateUpdateMediaContentInput(input);
-        requireContentExisting(input.getId());
+        requireContentExisting(contentId);
 
-        ContentEntity oldContentEntity = contentRepository.getReferenceById(input.getId());
-        ContentEntity updatedContentEntity = contentMapper.mediaContentDtoToEntity(input,
+        ContentEntity oldContentEntity = contentRepository.getReferenceById(contentId);
+        ContentEntity updatedContentEntity = contentMapper.mediaContentDtoToEntity(contentId, input,
                 oldContentEntity.getMetadata().getType());
 
         updatedContentEntity = updateContent(oldContentEntity, updatedContentEntity, input.getMetadata().getTagNames());
@@ -241,12 +241,12 @@ public class ContentService {
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
-    public Assessment updateAssessment(UpdateAssessmentInput input) {
+    public Assessment updateAssessment(UUID contentId, UpdateAssessmentInput input) {
         contentValidator.validateUpdateAssessmentContentInput(input);
-        requireContentExisting(input.getId());
+        requireContentExisting(contentId);
 
-        ContentEntity oldContentEntity = contentRepository.getReferenceById(input.getId());
-        ContentEntity updatedContentEntity = contentMapper.assessmentDtoToEntity(input,
+        ContentEntity oldContentEntity = contentRepository.getReferenceById(contentId);
+        ContentEntity updatedContentEntity = contentMapper.assessmentDtoToEntity(contentId, input,
                 oldContentEntity.getMetadata().getType());
 
         updatedContentEntity = updateContent(oldContentEntity, updatedContentEntity, input.getMetadata().getTagNames());

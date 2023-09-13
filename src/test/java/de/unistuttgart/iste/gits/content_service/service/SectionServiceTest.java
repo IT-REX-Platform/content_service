@@ -8,7 +8,9 @@ import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMappe
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.SectionMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.StageMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
-import de.unistuttgart.iste.gits.generated.dto.*;
+import de.unistuttgart.iste.gits.generated.dto.CreateSectionInput;
+import de.unistuttgart.iste.gits.generated.dto.Section;
+import de.unistuttgart.iste.gits.generated.dto.Stage;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -65,10 +67,7 @@ class SectionServiceTest {
     @Test
     void updateSectionTest() {
         UUID sectionId = UUID.randomUUID();
-        UpdateSectionInput input = UpdateSectionInput.builder()
-                .setId(sectionId)
-                .setName("Test Section")
-                .build();
+        String newName = "Test Section";
 
         SectionEntity oldSectionEntity = SectionEntity.builder()
                 .name("This is a Section")
@@ -77,7 +76,7 @@ class SectionServiceTest {
                 .stages(new HashSet<>()).build();
 
         SectionEntity newSectionEntity = SectionEntity.builder()
-                .name(input.getName())
+                .name(newName)
                 .id(sectionId)
                 .chapterId(oldSectionEntity.getChapterId())
                 .stages(new HashSet<>()).build();
@@ -90,12 +89,12 @@ class SectionServiceTest {
                 .build();
 
         //mock database
-        when(sectionRepository.existsById(input.getId())).thenReturn(true);
-        when(sectionRepository.getReferenceById(input.getId())).thenReturn(oldSectionEntity);
-        when(sectionRepository.save(any())).thenReturn(newSectionEntity);
+        when(sectionRepository.existsById(sectionId)).thenReturn(true);
+        when(sectionRepository.getReferenceById(sectionId)).thenReturn(oldSectionEntity);
+        when(sectionRepository.save(newSectionEntity)).thenReturn(newSectionEntity);
 
         // execute method under test
-        Section result = sectionService.updateSection(input);
+        Section result = sectionService.updateSectionName(sectionId, newName);
 
         verify(sectionRepository, times(1)).save(newSectionEntity);
 
@@ -109,16 +108,13 @@ class SectionServiceTest {
     @Test
     void updateNoneExistingSectionTest() {
         UUID sectionId = UUID.randomUUID();
-        UpdateSectionInput input = UpdateSectionInput.builder()
-                .setId(sectionId)
-                .setName("Test Section")
-                .build();
+        String newName = "Test Section";
 
         //mock database
-        when(sectionRepository.existsById(input.getId())).thenReturn(false);
+        when(sectionRepository.existsById(sectionId)).thenReturn(false);
 
         // execute method under test
-        assertThrows(EntityNotFoundException.class, () -> sectionService.updateSection(input));
+        assertThrows(EntityNotFoundException.class, () -> sectionService.updateSectionName(sectionId, newName));
     }
 
     @Test
@@ -167,10 +163,7 @@ class SectionServiceTest {
     @Test
     void updateSectionWithStagesTest() {
         UUID sectionId = UUID.randomUUID();
-        UpdateSectionInput input = UpdateSectionInput.builder()
-                .setId(sectionId)
-                .setName("Test Section")
-                .build();
+        String newName = "Test Section";
 
         SectionEntity oldSectionEntity = SectionEntity.builder()
                 .name("This is a Section")
@@ -184,7 +177,7 @@ class SectionServiceTest {
                 ).build();
 
         SectionEntity newSectionEntity = SectionEntity.builder()
-                .name(input.getName())
+                .name(newName)
                 .id(sectionId)
                 .chapterId(oldSectionEntity.getChapterId())
                 .stages(oldSectionEntity.getStages())
@@ -201,12 +194,12 @@ class SectionServiceTest {
                 .build();
 
         //mock database
-        when(sectionRepository.existsById(input.getId())).thenReturn(true);
-        when(sectionRepository.getReferenceById(input.getId())).thenReturn(oldSectionEntity);
+        when(sectionRepository.existsById(sectionId)).thenReturn(true);
+        when(sectionRepository.getReferenceById(sectionId)).thenReturn(oldSectionEntity);
         when(sectionRepository.save(any())).thenReturn(newSectionEntity);
 
         // execute method under test
-        Section result = sectionService.updateSection(input);
+        Section result = sectionService.updateSectionName(sectionId, newName);
 
         verify(sectionRepository, times(1)).save(newSectionEntity);
 
@@ -265,16 +258,11 @@ class SectionServiceTest {
         List<UUID> sortedStageIds = stageEntities.stream().map(StageEntity::getId).sorted().toList();
 
 
-        StageOrderInput stageOrderInput = StageOrderInput.builder()
-                .setSectionId(sectionId)
-                .setStageIds(sortedStageIds)
-                .build();
-
         //mock database
-        when(sectionRepository.getReferenceById(stageOrderInput.getSectionId())).thenReturn(sectionEntity);
+        when(sectionRepository.getReferenceById(sectionId)).thenReturn(sectionEntity);
         when(sectionRepository.save(any())).thenReturn(sectionEntity);
 
-        Section result = sectionService.reorderStages(stageOrderInput);
+        Section result = sectionService.reorderStages(sectionId, sortedStageIds);
 
         verify(sectionRepository, times(1)).getReferenceById(sectionId);
         verify(sectionRepository, times(1)).save(any());
@@ -284,7 +272,7 @@ class SectionServiceTest {
         }
     }
 
-    // case: received stage ID list contains elements that are not part of the work Path
+    // case: received stage ID list contains elements that are not part of the Section
     @Test
     void reorderStagesInvalidStageListTest() {
 
@@ -309,17 +297,11 @@ class SectionServiceTest {
                 .sorted()
                 .toList();
 
-
-        StageOrderInput stageOrderInput = StageOrderInput.builder()
-                .setSectionId(sectionId)
-                .setStageIds(sortedStageIds)
-                .build();
-
         //mock database
-        when(sectionRepository.getReferenceById(stageOrderInput.getSectionId())).thenReturn(sectionEntity);
+        when(sectionRepository.getReferenceById(sectionId)).thenReturn(sectionEntity);
         when(sectionRepository.save(any())).thenReturn(sectionEntity);
 
-        assertThrows(EntityNotFoundException.class, () -> sectionService.reorderStages(stageOrderInput));
+        assertThrows(EntityNotFoundException.class, () -> sectionService.reorderStages(sectionId, sortedStageIds));
 
     }
 
@@ -349,17 +331,11 @@ class SectionServiceTest {
                 .sorted()
                 .toList();
 
-
-        StageOrderInput stageOrderInput = StageOrderInput.builder()
-                .setSectionId(sectionId)
-                .setStageIds(sortedStageIds)
-                .build();
-
         //mock database
-        when(sectionRepository.getReferenceById(stageOrderInput.getSectionId())).thenReturn(sectionEntity);
+        when(sectionRepository.getReferenceById(sectionId)).thenReturn(sectionEntity);
         when(sectionRepository.save(any())).thenReturn(sectionEntity);
 
-        assertThrows(EntityNotFoundException.class, () -> sectionService.reorderStages(stageOrderInput));
+        assertThrows(EntityNotFoundException.class, () -> sectionService.reorderStages(sectionId, sortedStageIds));
 
     }
 

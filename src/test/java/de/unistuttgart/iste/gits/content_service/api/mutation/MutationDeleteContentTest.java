@@ -1,6 +1,5 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
@@ -27,9 +26,6 @@ import static graphql.Assert.assertFalse;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 
 
@@ -78,14 +74,16 @@ class MutationDeleteContentTest {
 
         String query = """
                 mutation($id: UUID!) {
-                    deleteContent(id: $id)
+                    mutateContent(contentId: $id){
+                        deleteContent
+                    }
                 }
                 """;
 
         graphQlTester.document(query)
                 .variable("id", contentEntity.getId())
                 .execute()
-                .path("deleteContent").entity(UUID.class).isEqualTo(contentEntity.getId());
+                .path("mutateContent.deleteContent").entity(UUID.class).isEqualTo(contentEntity.getId());
 
         assertThat(contentRepository.findById(contentEntity.getId()).isEmpty(), is(true));
         assertThat(contentRepository.count(), is(0L));
@@ -130,14 +128,16 @@ class MutationDeleteContentTest {
 
         String query = """
                 mutation($id: UUID!) {
-                    deleteContent(id: $id)
+                    mutateContent(contentId: $id){
+                        deleteContent
+                    } 
                 }
                 """;
 
         graphQlTester.document(query)
                 .variable("id", contentEntity.getId())
                 .execute()
-                .path("deleteContent").entity(UUID.class).isEqualTo(contentEntity.getId());
+                .path("mutateContent.deleteContent").entity(UUID.class).isEqualTo(contentEntity.getId());
 
         assertThat(contentRepository.findById(contentEntity.getId()).isEmpty(), is(true));
         System.out.println(contentRepository.findAll());
@@ -160,7 +160,9 @@ class MutationDeleteContentTest {
         UUID id = UUID.randomUUID();
         String query = """
                 mutation($id: UUID!) {
-                    deleteContent(id: $id)
+                    mutateContent(contentId: $id){
+                        deleteContent
+                    } 
                 }
                 """;
 

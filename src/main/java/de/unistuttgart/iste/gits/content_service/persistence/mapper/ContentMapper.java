@@ -1,11 +1,15 @@
 package de.unistuttgart.iste.gits.content_service.persistence.mapper;
 
-import de.unistuttgart.iste.gits.content_service.persistence.dao.*;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.AssessmentEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.dao.MediaContentEntity;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -29,9 +33,10 @@ public class ContentMapper {
         return modelMapper.map(input, MediaContentEntity.class);
     }
 
-    public MediaContentEntity mediaContentDtoToEntity(UpdateMediaContentInput input, ContentType contentType) {
+    public MediaContentEntity mediaContentDtoToEntity(UUID contentId, UpdateMediaContentInput input, ContentType contentType) {
         var result = modelMapper.map(input, MediaContentEntity.class);
         result.getMetadata().setType(contentType);
+        result.setId(contentId);
         return result;
     }
 
@@ -45,9 +50,10 @@ public class ContentMapper {
         return modelMapper.map(input, AssessmentEntity.class);
     }
 
-    public AssessmentEntity assessmentDtoToEntity(UpdateAssessmentInput input, ContentType contentType) {
+    public AssessmentEntity assessmentDtoToEntity(UUID contentId, UpdateAssessmentInput input, ContentType contentType) {
         var result = modelMapper.map(input, AssessmentEntity.class);
         result.getMetadata().setType(contentType);
+        result.setId(contentId);
         return result;
     }
 

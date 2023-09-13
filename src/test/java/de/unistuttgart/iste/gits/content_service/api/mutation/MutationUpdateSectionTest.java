@@ -5,7 +5,6 @@ import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
 import de.unistuttgart.iste.gits.generated.dto.Section;
-import de.unistuttgart.iste.gits.generated.dto.UpdateSectionInput;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -34,36 +33,37 @@ class MutationUpdateSectionTest {
                 .build();
         sectionEntity = sectionRepository.save(sectionEntity);
 
-        UpdateSectionInput input = UpdateSectionInput.builder()
-                .setId(sectionEntity.getId())
-                .setName("New Name")
-                .build();
+        String newName = "New Name";
 
         String query = """
-                mutation ($input: UpdateSectionInput!){
-                    updateSection(input: $input){
-                    id
-                    name
-                    chapterId
-                    stages {
-                        id                 
+                mutation ($id: UUID!, $name: String!){
+                    mutateSection(sectionId: $id){
+                        updateSectionName(name: $name){
+                            id
+                            name
+                            chapterId
+                            stages {
+                                id                 
+                            }
                         }
                     }
+                    
                 }
                 """;
 
         SectionEntity finalSectionEntity = sectionEntity;
 
         tester.document(query)
-                .variable("input", input)
+                .variable("id", sectionEntity.getId())
+                .variable("name", newName)
                 .execute()
-                .path("updateSection")
+                .path("mutateSection.updateSectionName")
                 .entity(Section.class)
                 .satisfies(section -> {
                           assertEquals(finalSectionEntity.getId(), section.getId());
-                          assertEquals(finalSectionEntity.getChapterId(), section.getChapterId());
-                          assertEquals(input.getName(), section.getName());
-                          assertTrue(section.getStages().isEmpty());
+                    assertEquals(finalSectionEntity.getChapterId(), section.getChapterId());
+                    assertEquals(newName, section.getName());
+                    assertTrue(section.getStages().isEmpty());
                       }
                 );
     }

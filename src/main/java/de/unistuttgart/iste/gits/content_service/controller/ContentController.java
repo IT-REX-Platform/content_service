@@ -1,7 +1,9 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
-import de.unistuttgart.iste.gits.content_service.service.*;
+import de.unistuttgart.iste.gits.content_service.service.ContentService;
+import de.unistuttgart.iste.gits.content_service.service.SuggestionService;
+import de.unistuttgart.iste.gits.content_service.service.UserProgressDataService;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,13 +51,19 @@ public class ContentController {
     }
 
     @MutationMapping
+    public ContentMutation mutateContent(@Argument UUID contentId) {
+        //parent object for nested mutations
+        return new ContentMutation(contentId, contentId);
+    }
+
+    @MutationMapping
     public MediaContent createMediaContent(@Argument CreateMediaContentInput input) {
         return contentService.createMediaContent(input);
     }
 
-    @MutationMapping
-    public MediaContent updateMediaContent(@Argument UpdateMediaContentInput input) {
-        return contentService.updateMediaContent(input);
+    @SchemaMapping(typeName = "ContentMutation")
+    public MediaContent updateMediaContent(@Argument UpdateMediaContentInput input, ContentMutation contentMutation) {
+        return contentService.updateMediaContent(contentMutation.getContentId(), input);
     }
 
     @MutationMapping
@@ -63,24 +71,24 @@ public class ContentController {
         return contentService.createAssessment(input);
     }
 
-    @MutationMapping
-    public Assessment updateAssessment(@Argument UpdateAssessmentInput input) {
-        return contentService.updateAssessment(input);
+    @SchemaMapping(typeName = "ContentMutation")
+    public Assessment updateAssessment(@Argument UpdateAssessmentInput input, ContentMutation contentMutation) {
+        return contentService.updateAssessment(contentMutation.getContentId(), input);
     }
 
-    @MutationMapping
-    public UUID deleteContent(@Argument UUID id) {
-        return contentService.deleteContent(id);
+    @SchemaMapping(typeName = "ContentMutation")
+    public UUID deleteContent(ContentMutation contentMutation) {
+        return contentService.deleteContent(contentMutation.getContentId());
     }
 
-    @MutationMapping
-    public Content addTagToContent(@Argument("contentId") UUID id, @Argument String tagName) {
-        return contentService.addTagToContent(id, tagName);
+    @SchemaMapping(typeName = "ContentMutation")
+    public Content addTagToContent(@Argument String tagName, ContentMutation contentMutation) {
+        return contentService.addTagToContent(contentMutation.getContentId(), tagName);
     }
 
-    @MutationMapping
-    public Content removeTagFromContent(@Argument("contentId") UUID id, @Argument String tagName) {
-        return contentService.removeTagFromContent(id, tagName);
+    @SchemaMapping(typeName = "ContentMutation")
+    public Content removeTagFromContent(@Argument String tagName, ContentMutation contentMutation) {
+        return contentService.removeTagFromContent(contentMutation.getContentId(), tagName);
     }
 
     public abstract class ContentResolver<T extends Content> {

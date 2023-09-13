@@ -8,7 +8,6 @@ import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionR
 import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
 import de.unistuttgart.iste.gits.generated.dto.Section;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
-import de.unistuttgart.iste.gits.generated.dto.StageOrderInput;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -61,37 +60,38 @@ class MutationChangeStageOrderTest {
 
         }
 
-        StageOrderInput input = StageOrderInput.builder()
-                .setSectionId(sectionEntity.getId())
-                .setStageIds(newStageOrderList)
-                .build();
-
         String query = """
-                mutation($input: StageOrderInput!){
-                    updateStageOrder(input: $input){
-                        id
-                        chapterId
-                        name
-                        stages {
+                mutation($id: UUID!, $stageList: [UUID!]!){
+                    mutateSection(sectionId: $id){
+                        updateStageOrder(stages: $stageList){
                             id
-                            position
-                            requiredContents {
-                                id                            
-                            }   
-                            optionalContents {
-                                id                            
-                            }                     
+                            chapterId
+                            name
+                            stages {
+                                id
+                                position
+                                requiredContents {
+                                    id                            
+                                }   
+                                optionalContents {
+                                    id                            
+                                }                     
                         }
                     }
+                    }
+                    
                 }
                 """;
-        tester.document(query).variable("input", input).execute().path("updateStageOrder").entity(Section.class).satisfies(workPath -> {
-            assertEquals(3, workPath.getStages().size());
-            for (Stage stage: workPath.getStages()) {
-                assertEquals(newStageOrderList.indexOf(stage.getId()), stage.getPosition());
-            }
-                }
-        );
+        tester.document(query)
+                .variable("id", sectionEntity.getId())
+                .variable("stageList", newStageOrderList)
+                .execute().path("mutateSection.updateStageOrder").entity(Section.class).satisfies(section -> {
+                            assertEquals(3, section.getStages().size());
+                            for (Stage stage : section.getStages()) {
+                                assertEquals(newStageOrderList.indexOf(stage.getId()), stage.getPosition());
+                            }
+                        }
+                );
     }
 
     private StageEntity buildStageEntity (UUID sectionId, int pos){

@@ -42,14 +42,17 @@ class MutationDeleteStageTest {
         stageEntity = stageRepository.save(stageEntity);
 
         String query = """
-                mutation ($id: UUID!){
-                deleteStage(id: $id)
+                mutation ($sectionId: UUID!, $id: UUID!){
+                    mutateSection(sectionId: $sectionId){
+                        deleteStage(id: $id)
+                    }
                 }
                 """;
         tester.document(query)
+                .variable("sectionId", sectionEntity.getId())
                 .variable("id", stageEntity.getId())
                 .execute()
-                .path("deleteStage")
+                .path("mutateSection.deleteStage")
                 .entity(UUID.class)
                 .isEqualTo(stageEntity.getId());
     }

@@ -45,7 +45,8 @@ class QueryContentsWithUserDataTest {
                     "id": "%s",
                     "userName": "MyUserName",
                     "firstName": "John",
-                    "lastName": "Doe"
+                    "lastName": "Doe",
+                    "courseMemberships": []
                 }
                 """.formatted(userId1.toString());
 

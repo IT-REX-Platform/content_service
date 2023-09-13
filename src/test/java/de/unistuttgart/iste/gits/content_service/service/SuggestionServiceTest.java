@@ -375,8 +375,8 @@ class SuggestionServiceTest {
                         Stage.builder()
                                 .setRequiredContents(
                                         List.of(
-                                                assessmentWithSuggestedDateAndSkillType(now().minusDays(10), "skill1", SkillType.ANALYSE),
-                                                assessmentWithSuggestedDateAndSkillType(now().minusDays(10), "skill2", SkillType.APPLY),
+                                                assessmentWithSuggestedDateAndSkillType(now().minusDays(10), "skill1", List.of(SkillType.ANALYSE)),
+                                                assessmentWithSuggestedDateAndSkillType(now().minusDays(10), "skill2", List.of(SkillType.APPLY)),
                                                 contentWithSuggestedDate(now().minusDays(10), "noSkill")))
                                 .setOptionalContents(List.of())
                                 .build()))
@@ -475,14 +475,14 @@ class SuggestionServiceTest {
                 .build());
     }
 
-    private Assessment assessmentWithSuggestedDateAndSkillType(OffsetDateTime suggestedDate, String name, SkillType skillType) {
+    private Assessment assessmentWithSuggestedDateAndSkillType(OffsetDateTime suggestedDate, String name, List<SkillType> skillTypes) {
         return FlashcardSetAssessment.builder()
                 .setMetadata(ContentMetadata.builder()
                         .setSuggestedDate(suggestedDate)
                         .setName(name)
                         .build())
                 .setAssessmentMetadata(AssessmentMetadata.builder()
-                        .setSkillType(skillType)
+                        .setSkillTypes(skillTypes)
                         .build())
                 .build();
     }

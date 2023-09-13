@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @implNote fields are nullable because media content does not have them, and we use single table inheritance.
  */
@@ -22,7 +24,7 @@ public class AssessmentMetadataEmbeddable {
     private int skillPoints;
 
     @Column(nullable = true)
-    private SkillType skillType;
+    private List<SkillType> skillTypes;
 
     @Column(nullable = true)
     private int initialLearningInterval;

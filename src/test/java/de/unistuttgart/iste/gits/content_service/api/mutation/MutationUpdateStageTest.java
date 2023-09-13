@@ -2,14 +2,12 @@ package de.unistuttgart.iste.gits.content_service.api.mutation;
 
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
-import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentMetadataEmbeddable;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.MediaContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.StageEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
-import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import de.unistuttgart.iste.gits.generated.dto.UpdateStageInput;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -17,11 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.annotation.Commit;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import static de.unistuttgart.iste.gits.content_service.TestData.buildContentEntity;
 
 @GraphQlApiTest
 @TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data", "content", "tag"})
@@ -70,17 +69,20 @@ class MutationUpdateStageTest {
                 .build();
 
         String query = """
-                mutation ($input: UpdateStageInput!){
-                    updateStage(input: $input){
-                        id
-                        position
-                        requiredContents {
+                mutation ($id: UUID!, $input: UpdateStageInput!){
+                    mutateSection(sectionId: $id){
+                        updateStage(input: $input){
                             id
-                        }
-                        optionalContents {
-                            id
+                            position
+                            requiredContents {
+                                id
+                            }
+                            optionalContents {
+                                id
+                            }
                         }
                     }
+                    
                 }
                 """;
 
@@ -102,23 +104,11 @@ class MutationUpdateStageTest {
                 """.formatted(stageEntity.getId(), contentIds.get(0), contentIds.get(1));
 
         tester.document(query)
+                .variable("id", sectionEntity.getId())
                 .variable("input", input)
-                .execute().path("updateStage").matchesJson(expectedJson);
+                .execute().path("mutateSection.updateStage").matchesJson(expectedJson);
 
     }
 
-    private MediaContentEntity buildContentEntity(UUID chapterId){
-        return MediaContentEntity.builder()
-                .id(UUID.randomUUID())
-                .metadata(
-                        ContentMetadataEmbeddable.builder()
-                                .tags(new HashSet<>())
-                                .name("Test")
-                                .type(ContentType.MEDIA)
-                                .suggestedDate(OffsetDateTime.parse("2020-01-01T00:00:00.000Z"))
-                                .rewardPoints(20)
-                                .chapterId(chapterId)
-                                .build()
-                ).build();
-    }
+
 }

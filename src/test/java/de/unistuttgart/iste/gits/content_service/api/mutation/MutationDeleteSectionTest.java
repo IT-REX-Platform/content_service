@@ -30,13 +30,15 @@ class MutationDeleteSectionTest {
 
         String query = """
                 mutation ($id: UUID!){
-                deleteSection(id: $id)
+                    mutateSection(sectionId: $id){
+                        deleteSection
+                    }
                 }
                 """;
         tester.document(query)
                 .variable("id", sectionEntity.getId())
                 .execute()
-                .path("deleteSection")
+                .path("mutateSection.deleteSection")
                 .entity(UUID.class)
                 .isEqualTo(sectionEntity.getId());
     }

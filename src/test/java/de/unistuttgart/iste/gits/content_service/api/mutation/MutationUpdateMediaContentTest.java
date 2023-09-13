@@ -42,26 +42,28 @@ class MutationUpdateMediaContentTest {
 
         String query = """
                 mutation($contentId: UUID!, $chapterId: UUID!) {
-                    updateMediaContent(input: {
-                        id: $contentId,
-                        metadata: {
-                            name: "newName",
-                            suggestedDate: "2022-01-01T00:00:00.000Z",
-                            tagNames: ["newTag1", "newTag2"],
-                            chapterId: $chapterId,
-                            rewardPoints: 3
-                        }
-                    }) {
-                        id
-                        metadata {
-                            name
-                            suggestedDate
-                            tagNames
-                            type
-                            chapterId
-                            rewardPoints
+                    mutateContent(contentId: $contentId){
+                        updateMediaContent(input: {
+                            metadata: {
+                                name: "newName",
+                                suggestedDate: "2022-01-01T00:00:00.000Z",
+                                tagNames: ["newTag1", "newTag2"],
+                                chapterId: $chapterId,
+                                rewardPoints: 3
+                            }
+                        }) {
+                            id
+                            metadata {
+                                name
+                                suggestedDate
+                                tagNames
+                                type
+                                chapterId
+                                rewardPoints
+                            }
                         }
                     }
+                                
                 }
                 """;
 
@@ -69,7 +71,7 @@ class MutationUpdateMediaContentTest {
                 .variable("contentId", contentEntity.getId())
                 .variable("chapterId", newChapterId)
                 .execute()
-                .path("updateMediaContent").entity(MediaContent.class).get();
+                .path("mutateContent.updateMediaContent").entity(MediaContent.class).get();
 
         // check that returned mediaContent is correct
         assertThat(updatedMediaContent.getId(), is(notNullValue()));
