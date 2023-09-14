@@ -15,3 +15,15 @@ For integration tests, a H2 database is used instead of a separate Postgresql da
 For Postgresql and H2, two different configurations are required. 
 For this purpose, a separate configuration file `application-dev.properties` is used which contains all the configuration
 settings for development. To activate this, the following environment variable has to be set: `SPRING_CONFIG_NAME=dev`.
+
+## API description
+
+The GraphQL API is described in the [api.md file](api.md).
+
+The endpoint for the GraphQL API is `/graphql`. The GraphQL Playground is available at `/graphiql`.
+
+## How to run
+
+How to run services locally is described in
+the [wiki](https://gits-enpro.readthedocs.io/en/latest/dev-manuals/backend/get-started.html).
+

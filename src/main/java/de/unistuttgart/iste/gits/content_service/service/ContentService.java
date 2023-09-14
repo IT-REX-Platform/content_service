@@ -1,9 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
 
-import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
-import de.unistuttgart.iste.gits.common.event.ResourceUpdateEvent;
+import de.unistuttgart.iste.gits.common.event.*;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.dao.ContentEntity;
@@ -83,6 +81,7 @@ public class ContentService {
      */
     public List<Content> getContentsById(List<UUID> ids) {
         List<Content> contents = findContentsById(ids);
+        System.out.println("test");
 
         List<UUID> notFound = new ArrayList<>();
         for (int i = 0; i < contents.size(); i++) {
