@@ -81,7 +81,6 @@ public class ContentService {
      */
     public List<Content> getContentsById(List<UUID> ids) {
         List<Content> contents = findContentsById(ids);
-        System.out.println("test");
 
         List<UUID> notFound = new ArrayList<>();
         for (int i = 0; i < contents.size(); i++) {
