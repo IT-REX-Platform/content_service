@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "user_progress_data_progress_log", "user_progress_data", "content", "tag"})
+@TablesToDelete({"content_tags", "user_progress_data_progress_log", "user_progress_data", "content"})
 class QueryContentsWithUserDataTest {
 
     @Autowired

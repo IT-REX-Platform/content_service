@@ -18,7 +18,7 @@ import java.util.UUID;
  * Basic test for the suggestions query, detailed tests are in the SuggestionsServiceTest.
  */
 @GraphQlApiTest
-@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data_progress_log", "user_progress_data", "content", "tag"})
+@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data_progress_log", "user_progress_data", "content"})
 class QuerySuggestionsTest {
 
     @Autowired

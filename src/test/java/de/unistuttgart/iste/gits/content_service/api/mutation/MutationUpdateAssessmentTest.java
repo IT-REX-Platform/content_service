@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "content", "tag"})
+@TablesToDelete({"content_tags", "content"})
 class MutationUpdateAssessmentTest {
 
     @Autowired
@@ -106,7 +106,7 @@ class MutationUpdateAssessmentTest {
         assertThat(assessmentEntity.getMetadata().getSuggestedDate(),
                 is(OffsetDateTime.parse("2022-01-01T00:00:00.000Z")));
         assertThat(assessmentEntity.getMetadata().getRewardPoints(), is(3));
-        assertThat(assessmentEntity.getTagNames(), containsInAnyOrder("newTag1", "newTag2"));
+        assertThat(assessmentEntity.getMetadata().getTags(), containsInAnyOrder("newTag1", "newTag2"));
         assertThat(assessmentEntity.getMetadata().getType(), is(ContentType.FLASHCARDS));
         assertThat(assessmentEntity.getMetadata().getChapterId(), is(newChapterId));
         assertThat(assessmentEntity.getAssessmentMetadata().getSkillPoints(), is(3));

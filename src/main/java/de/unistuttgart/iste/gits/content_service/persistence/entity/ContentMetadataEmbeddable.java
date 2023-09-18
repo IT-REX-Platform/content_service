@@ -27,16 +27,14 @@ public class ContentMetadataEmbeddable {
     @Enumerated(EnumType.STRING)
     private ContentType type;
 
-    @EqualsAndHashCode.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade =
-            {CascadeType.MERGE, CascadeType.REFRESH})
+    @ElementCollection
     @Builder.Default
-    private Set<TagEntity> tags = new HashSet<>();
+    private Set<String> tags = new HashSet<>();
 
     @Column(nullable = false, name = "chapter_id")
     private UUID chapterId;
 
-    public Set<TagEntity> getTags() {
+    public Set<String> getTags() {
         if (tags == null) {
             tags = new HashSet<>();
         }

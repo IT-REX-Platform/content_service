@@ -18,7 +18,7 @@ import static graphql.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "user_progress_data_progress_log", "user_progress_data", "content", "tag"})
+@TablesToDelete({"content_tags", "user_progress_data_progress_log", "user_progress_data", "content"})
 class QueryProgressByChapterIdsTest {
 
     @Autowired

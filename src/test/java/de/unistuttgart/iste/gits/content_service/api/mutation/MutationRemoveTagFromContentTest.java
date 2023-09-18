@@ -5,28 +5,26 @@ import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.annotation.Commit;
 
-import java.util.*;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "content", "tag"})
+@TablesToDelete({"content_tags", "content"})
 class MutationRemoveTagFromContentTest {
 
     @Autowired
     private ContentRepository contentRepository;
-    @Autowired
-    private TagRepository tagRepository;
 
     /**
      * Given a content with tags
@@ -39,7 +37,7 @@ class MutationRemoveTagFromContentTest {
     void testRemoveTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(TagEntity.fromName("tag1"), TagEntity.fromName("tag2")))
+                        .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());
 
@@ -67,11 +65,7 @@ class MutationRemoveTagFromContentTest {
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(1));
-        assertThat(updatedContentEntity.getTagNames(), containsInAnyOrder("tag2"));
-
-        List<TagEntity> tags = tagRepository.findAll();
-        assertThat(tags, hasSize(1));
-        assertThat(tags.get(0).getName(), is("tag2"));
+        assertThat(updatedContentEntity.getMetadata().getTags(), containsInAnyOrder("tag2"));
 
     }
 
@@ -86,7 +80,7 @@ class MutationRemoveTagFromContentTest {
     void testRemoveNonExistingTagFromContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(TagEntity.fromName("tag1"), TagEntity.fromName("tag2")))
+                        .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());
 
@@ -114,7 +108,7 @@ class MutationRemoveTagFromContentTest {
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(2));
-        assertThat(updatedContentEntity.getTagNames(), containsInAnyOrder("tag1", "tag2"));
+        assertThat(updatedContentEntity.getMetadata().getTags(), containsInAnyOrder("tag1", "tag2"));
     }
 
 

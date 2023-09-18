@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "content", "tag"})
+@TablesToDelete({"content_tags", "content"})
 class MutationCreateAssessmentTest {
 
     @Autowired
@@ -116,7 +116,7 @@ class MutationCreateAssessmentTest {
         assertThat(assessmentEntity.getMetadata().getName(), is("name"));
         assertThat(assessmentEntity.getMetadata().getSuggestedDate(),
                 is(LocalDate.of(2021, 1, 1).atStartOfDay().atOffset(ZoneOffset.UTC)));
-        assertThat(assessmentEntity.getTagNames(), containsInAnyOrder("tag1", "tag2"));
+        assertThat(assessmentEntity.getMetadata().getTags(), containsInAnyOrder("tag1", "tag2"));
         assertThat(assessmentEntity.getMetadata().getType(), is(ContentType.FLASHCARDS));
         assertThat(assessmentEntity.getMetadata().getChapterId(), is(chapterId));
         assertThat(assessmentEntity.getMetadata().getRewardPoints(), is(1));

@@ -6,9 +6,9 @@ import de.unistuttgart.iste.gits.common.exception.IncompleteEventMessageExceptio
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import de.unistuttgart.iste.gits.content_service.validation.ContentValidator;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,7 +26,6 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
     private final UserProgressDataRepository userProgressDataRepository;
-    private final TagRepository tagRepository;
     private final StageService stageService;
     private final ContentMapper contentMapper;
     private final ContentValidator contentValidator;
@@ -145,10 +144,8 @@ public class ContentService {
     public Content addTagToContent(UUID id, String tagName) {
         ContentEntity content = requireContentExisting(id);
 
-        tagRepository.insertIfNotExists(tagName);
-
-        Set<TagEntity> newTags = new HashSet<>(content.getMetadata().getTags());
-        newTags.add(TagEntity.fromName(tagName));
+        Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
+        newTags.add(tagName);
         content.getMetadata().setTags(newTags);
         content = contentRepository.save(content);
         return contentMapper.entityToDto(content);
@@ -164,12 +161,11 @@ public class ContentService {
     public Content removeTagFromContent(UUID id, String tagName) {
         ContentEntity content = requireContentExisting(id);
 
-        Set<TagEntity> newTags = new HashSet<>(content.getMetadata().getTags());
-        newTags.remove(TagEntity.fromName(tagName));
+        Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
+        newTags.remove(tagName);
         content.getMetadata().setTags(newTags);
         content = contentRepository.save(content);
 
-        tagRepository.deleteUnusedTags();
         return contentMapper.entityToDto(content);
     }
 
@@ -240,7 +236,6 @@ public class ContentService {
      * @return entity saved
      */
     private <T extends ContentEntity> T createContent(T contentEntity) {
-        contentEntity.getTagNames().forEach(tagRepository::insertIfNotExists);
         contentEntity = contentRepository.save(contentEntity);
 
         topicPublisher.notifyChange(contentEntity, CrudOperation.CREATE);
@@ -257,10 +252,7 @@ public class ContentService {
      * @return entity saved
      */
     private <T extends ContentEntity> T updateContent(T oldContentEntity, T updatedContentEntity) {
-        updatedContentEntity.getTagNames().forEach(tagRepository::insertIfNotExists);
         updatedContentEntity = contentRepository.save(updatedContentEntity);
-
-        tagRepository.deleteUnusedTags();
 
         // if the content is assigned to a different chapter course Links need to be potentially updated and therefore an Update request is sent to the resource services
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {
@@ -342,8 +334,6 @@ public class ContentService {
         stageService.deleteContentLinksFromStages(contentEntity);
 
         contentRepository.delete(contentEntity);
-
-        tagRepository.deleteUnusedTags();
 
         // publish changes applied to content entity
         topicPublisher.notifyChange(contentEntity, CrudOperation.DELETE);

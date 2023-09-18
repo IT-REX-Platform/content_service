@@ -3,7 +3,8 @@ package de.unistuttgart.iste.gits.content_service.api.mutation;
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
+import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import de.unistuttgart.iste.gits.generated.dto.MediaContent;
@@ -20,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "content", "tag"})
+@TablesToDelete({"content_tags", "content"})
 class MutationUpdateMediaContentTest {
 
     @Autowired
@@ -92,7 +93,7 @@ class MutationUpdateMediaContentTest {
         assertThat(mediaContentEntity.getMetadata().getSuggestedDate(),
                 is(OffsetDateTime.parse("2022-01-01T00:00:00.000Z")));
         assertThat(mediaContentEntity.getMetadata().getRewardPoints(), is(3));
-        assertThat(mediaContentEntity.getTagNames(), containsInAnyOrder("newTag1", "newTag2"));
+        assertThat(mediaContentEntity.getMetadata().getTags(), containsInAnyOrder("newTag1", "newTag2"));
         assertThat(mediaContentEntity.getMetadata().getType(), is(ContentType.MEDIA));
         assertThat(mediaContentEntity.getMetadata().getChapterId(), is(newChapterId));
     }
@@ -109,7 +110,7 @@ class MutationUpdateMediaContentTest {
         ContentEntity contentEntity = contentRepository.save(
                 TestData.dummyMediaContentEntityBuilder()
                         .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                                .tags(new HashSet<>(Set.of(TagEntity.fromName("a"), TagEntity.fromName("b")))).build())
+                                .tags(new HashSet<>(Set.of("a", "b"))).build())
                         .build());
         UUID newChapterId = UUID.randomUUID();
 
@@ -154,6 +155,6 @@ class MutationUpdateMediaContentTest {
         MediaContentEntity mediaContentEntity = (MediaContentEntity) newContentEntity;
 
         // check that tags are updated correctly
-        assertThat(mediaContentEntity.getTagNames(), containsInAnyOrder("b", "c"));
+        assertThat(mediaContentEntity.getMetadata().getTags(), containsInAnyOrder("b", "c"));
     }
 }

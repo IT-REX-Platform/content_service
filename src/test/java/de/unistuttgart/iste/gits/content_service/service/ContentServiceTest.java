@@ -1,14 +1,13 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
-import de.unistuttgart.iste.gits.common.event.ResourceUpdateEvent;
+import de.unistuttgart.iste.gits.common.event.*;
 import de.unistuttgart.iste.gits.common.exception.IncompleteEventMessageException;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentMetadataEmbeddable;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
 import de.unistuttgart.iste.gits.content_service.validation.ContentValidator;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
@@ -18,9 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +27,6 @@ import static org.mockito.Mockito.*;
 class ContentServiceTest {
 
     private final ContentRepository contentRepository = Mockito.mock(ContentRepository.class);
-    private final TagRepository tagRepository = Mockito.mock(TagRepository.class);
     private final StageService stageService = Mockito.mock(StageService.class);
     private final ContentMapper contentMapper = new ContentMapper(new ModelMapper());
     private final ContentValidator contentValidator = Mockito.spy(ContentValidator.class);
@@ -38,7 +34,7 @@ class ContentServiceTest {
     private final UserProgressDataRepository userProgressDataRepository = Mockito.mock(UserProgressDataRepository.class);
 
     private final ContentService contentService = new ContentService(contentRepository, userProgressDataRepository,
-            tagRepository, stageService, contentMapper, contentValidator, mockPublisher);
+            stageService, contentMapper, contentValidator, mockPublisher);
 
     @Test
     void forwardResourceUpdates() {

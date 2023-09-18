@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 @GraphQlApiTest
-@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data", "content", "tag"})
+@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data", "content"})
 class MutationDeleteSectionTest {
 
     @Autowired

@@ -8,7 +8,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -30,27 +29,27 @@ public class ContentMapper {
 
     public MediaContentEntity mediaContentDtoToEntity(CreateMediaContentInput input) {
         var result = modelMapper.map(input, MediaContentEntity.class);
-        result.getMetadata().setTags(tagsFromNames(input.getMetadata().getTagNames()));
+        result.getMetadata().setTags(new HashSet<>(input.getMetadata().getTagNames()));
         return result;
     }
 
     public MediaContentEntity mediaContentDtoToEntity(UUID contentId, UpdateMediaContentInput input, ContentType contentType) {
         var result = modelMapper.map(input, MediaContentEntity.class);
         result.getMetadata().setType(contentType);
-        result.getMetadata().setTags(tagsFromNames(input.getMetadata().getTagNames()));
+        result.getMetadata().setTags(new HashSet<>(input.getMetadata().getTagNames()));
         result.setId(contentId);
         return result;
     }
 
     public MediaContent mediaContentEntityToDto(ContentEntity contentEntity) {
         MediaContent result = modelMapper.map(contentEntity, MediaContent.class);
-        result.getMetadata().setTagNames(contentEntity.getTagNames());
+        result.getMetadata().setTagNames(new ArrayList<>(contentEntity.getMetadata().getTags()));
         return result;
     }
 
     public AssessmentEntity assessmentDtoToEntity(CreateAssessmentInput input) {
         var result = modelMapper.map(input, AssessmentEntity.class);
-        result.getMetadata().setTags(tagsFromNames(input.getMetadata().getTagNames()));
+        result.getMetadata().setTags(new HashSet<>(input.getMetadata().getTagNames()));
         return result;
     }
 
@@ -59,13 +58,9 @@ public class ContentMapper {
                                                   ContentType contentType) {
         var result = modelMapper.map(input, AssessmentEntity.class);
         result.getMetadata().setType(contentType);
-        result.getMetadata().setTags(tagsFromNames(input.getMetadata().getTagNames()));
+        result.getMetadata().setTags(new HashSet<>(input.getMetadata().getTagNames()));
         result.setId(contentId);
         return result;
-    }
-
-    private Set<TagEntity> tagsFromNames(List<String> tagNames) {
-        return tagNames.stream().map(TagEntity::fromName).collect(Collectors.toSet());
     }
 
     public Assessment assessmentEntityToDto(ContentEntity contentEntity) {
@@ -79,7 +74,7 @@ public class ContentMapper {
             throw new IllegalStateException("Unsupported content type for assessment: " + contentEntity.getMetadata().getType());
         }
 
-        result.getMetadata().setTagNames(contentEntity.getTagNames());
+        result.getMetadata().setTagNames(new ArrayList<>(contentEntity.getMetadata().getTags()));
         return result;
     }
 

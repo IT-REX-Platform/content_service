@@ -4,7 +4,6 @@ import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
 import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.TagEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "content", "tag"})
+@TablesToDelete({"content_tags", "content"})
 class MutationAddTagToContentTest {
 
     @Autowired
@@ -57,7 +56,7 @@ class MutationAddTagToContentTest {
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(1));
-        assertThat(updatedContentEntity.getMetadata().getTags().iterator().next().getName(), is("tag"));
+        assertThat(updatedContentEntity.getMetadata().getTags().iterator().next(), is("tag"));
     }
 
     /**
@@ -71,7 +70,7 @@ class MutationAddTagToContentTest {
     void testAddTagToContentWithExistingTags(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(TagEntity.fromName("tag1")))
+                        .tags(Set.of("tag1"))
                         .build())
                 .build());
 
@@ -99,7 +98,7 @@ class MutationAddTagToContentTest {
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(2));
-        assertThat(updatedContentEntity.getTagNames(), containsInAnyOrder("tag1", "tag2"));
+        assertThat(updatedContentEntity.getMetadata().getTags(), containsInAnyOrder("tag1", "tag2"));
     }
 
     /**
@@ -113,7 +112,7 @@ class MutationAddTagToContentTest {
     void testAddDuplicateTagToContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(TagEntity.fromName("tag")))
+                        .tags(Set.of("tag"))
                         .build())
                 .build());
 
@@ -138,6 +137,6 @@ class MutationAddTagToContentTest {
 
         ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(1));
-        assertThat(updatedContentEntity.getTagNames(), contains("tag"));
+        assertThat(updatedContentEntity.getMetadata().getTags(), contains("tag"));
     }
 }

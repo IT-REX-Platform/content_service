@@ -5,9 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DiscriminatorFormula;
 
-import java.util.*;
-
-import static java.util.Collections.emptyList;
+import java.util.UUID;
 
 /**
  * Super class for assessment and media content.
@@ -48,11 +46,5 @@ public class ContentEntity {
     @Embedded
     @Builder.Default
     private ContentMetadataEmbeddable metadata = new ContentMetadataEmbeddable();
-
-    public List<String> getTagNames() {
-        return Optional.ofNullable(metadata.getTags())
-                .map(tags -> tags.stream().map(TagEntity::getName).toList())
-                .orElse(emptyList());
-    }
 
 }

@@ -20,7 +20,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GraphQlApiTest
-@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data_progress_log", "user_progress_data", "content", "tag"})
+@TablesToDelete({"stage_required_contents", "stage_optional_contents", "stage", "section", "content_tags", "user_progress_data_progress_log", "user_progress_data", "content"})
 class QuerySectionsByChapterTest {
 
     @Autowired

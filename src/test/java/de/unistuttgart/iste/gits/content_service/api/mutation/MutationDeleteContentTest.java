@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 
 @ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
 @GraphQlApiTest
-@TablesToDelete({"content_tags", "user_progress_data", "content", "tag"})
+@TablesToDelete({"content_tags", "user_progress_data", "content"})
 class MutationDeleteContentTest {
 
     @Autowired
@@ -35,8 +35,6 @@ class MutationDeleteContentTest {
     private StageRepository stageRepository;
     @Autowired
     private SectionRepository sectionRepository;
-    @Autowired
-    private TagRepository tagRepository;
     @Autowired
     private TopicPublisher topicPublisher;
 
@@ -52,9 +50,7 @@ class MutationDeleteContentTest {
     void testDeleteExistingContent(GraphQlTester graphQlTester) {
         ContentEntity contentEntity = contentRepository.save(TestData.dummyAssessmentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(new HashSet<>(Set.of(
-                                TagEntity.fromName("Tag"),
-                                TagEntity.fromName("Tag2"))))
+                        .tags(new HashSet<>(Set.of("Tag", "Tag2")))
                         .build())
                 .build());
         contentEntity = contentRepository.save(contentEntity);
@@ -94,9 +90,6 @@ class MutationDeleteContentTest {
         // test that user progress is deleted
         assertThat(userProgressRepository.count(), is(0L));
 
-        //Test that tag is deleted
-        assertThat(tagRepository.count(), is(0L));
-
     }
 
 
@@ -112,9 +105,7 @@ class MutationDeleteContentTest {
 
         ContentEntity contentEntity = contentRepository.save(TestData.dummyAssessmentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
-                        .tags(Set.of(
-                                TagEntity.fromName("Tag3"),
-                                TagEntity.fromName("Tag4")))
+                        .tags(Set.of("Tag3", "Tag4"))
                         .build())
                 .build());
 
@@ -152,7 +143,6 @@ class MutationDeleteContentTest {
         assertThat(contentRepository.findById(contentEntity.getId()).isEmpty(), is(true));
         System.out.println(contentRepository.findAll());
         assertThat(contentRepository.count(), is(0L));
-        assertThat(tagRepository.count(), is(0L));
 
         // assert content has been unlinked from Stages
         stageEntity = stageRepository.getReferenceById(stageEntity.getId());
