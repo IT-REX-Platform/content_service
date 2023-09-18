@@ -29,7 +29,7 @@ public class ContentMetadataEmbeddable {
 
     @EqualsAndHashCode.Exclude
     @ManyToMany(fetch = FetchType.LAZY, cascade =
-            {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+            {CascadeType.MERGE, CascadeType.REFRESH})
     @Builder.Default
     private Set<TagEntity> tags = new HashSet<>();
 

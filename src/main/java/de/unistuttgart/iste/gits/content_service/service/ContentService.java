@@ -1,9 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
 
-import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
-import de.unistuttgart.iste.gits.common.event.ResourceUpdateEvent;
+import de.unistuttgart.iste.gits.common.event.*;
 import de.unistuttgart.iste.gits.common.exception.IncompleteEventMessageException;
 import de.unistuttgart.iste.gits.common.util.PaginationUtil;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
@@ -147,6 +145,8 @@ public class ContentService {
     public Content addTagToContent(UUID id, String tagName) {
         ContentEntity content = requireContentExisting(id);
 
+        tagRepository.insertIfNotExists(tagName);
+
         Set<TagEntity> newTags = new HashSet<>(content.getMetadata().getTags());
         newTags.add(TagEntity.fromName(tagName));
         content.getMetadata().setTags(newTags);
@@ -240,7 +240,7 @@ public class ContentService {
      * @return entity saved
      */
     private <T extends ContentEntity> T createContent(T contentEntity) {
-
+        contentEntity.getTagNames().forEach(tagRepository::insertIfNotExists);
         contentEntity = contentRepository.save(contentEntity);
 
         topicPublisher.notifyChange(contentEntity, CrudOperation.CREATE);
@@ -257,8 +257,10 @@ public class ContentService {
      * @return entity saved
      */
     private <T extends ContentEntity> T updateContent(T oldContentEntity, T updatedContentEntity) {
-
+        updatedContentEntity.getTagNames().forEach(tagRepository::insertIfNotExists);
         updatedContentEntity = contentRepository.save(updatedContentEntity);
+
+        tagRepository.deleteUnusedTags();
 
         // if the content is assigned to a different chapter course Links need to be potentially updated and therefore an Update request is sent to the resource services
         if (!oldContentEntity.getMetadata().getChapterId().equals(updatedContentEntity.getMetadata().getChapterId())) {

@@ -13,4 +13,9 @@ public interface TagRepository extends JpaRepository<TagEntity, UUID> {
     @Modifying
     @Query("DELETE FROM Tag tag WHERE tag.name NOT IN (SELECT tag.name FROM Content content JOIN content.metadata.tags tag)")
     void deleteUnusedTags();
+
+    // sql query to insert a tag if it does not exist
+    @Modifying
+    @Query(value = "INSERT INTO Tag (name) VALUES (:tagName) ON CONFLICT DO NOTHING", nativeQuery = true)
+    void insertIfNotExists(String tagName);
 }
