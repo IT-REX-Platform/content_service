@@ -29,7 +29,7 @@ class QuerySkillTypesAchievableTest {
 
         String query = """
                 query ($chapterId: UUID!) {
-                    _internal_achievableSkillTypesByChapterIds(chapterIds: [$chapterId])
+                    _internal_noauth_achievableSkillTypesByChapterIds(chapterIds: [$chapterId])
                 }
                 """;
 

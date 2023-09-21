@@ -48,7 +48,7 @@ public class ContentController {
         return contentService.getContentsByChapterIds(chapterIds);
     }
 
-    @QueryMapping(name = "_internal_achievableSkillTypesByChapterIds")
+    @QueryMapping(name = "_internal_noauth_achievableSkillTypesByChapterIds")
     public List<List<SkillType>> internalAchievableSkillTypesByChapterIds(@Argument List<UUID> chapterIds) {
         return contentService.getAchievableSkillTypesByChapterIds(chapterIds);
     }

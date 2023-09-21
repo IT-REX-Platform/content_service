@@ -55,7 +55,7 @@ type Query {
     Retrieves all skill types that are achievable for the given chapters.
     Each chapter will have its own list of skill types (batching query).
     """
-    _internal_achievableSkillTypesByChapterIds(chapterIds: [UUID!]!): [[SkillType!]!]!
+    _internal_noauth_achievableSkillTypesByChapterIds(chapterIds: [UUID!]!): [[SkillType!]!]!
 
 }
 
