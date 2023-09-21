@@ -49,7 +49,7 @@ public class ContentController {
     }
 
     @QueryMapping(name = "_internal_achievableSkillTypesByChapterIds")
-    public List<List<SkillType>> achievableSkillTypesByChapterIds(@Argument List<UUID> chapterIds) {
+    public List<List<SkillType>> internalAchievableSkillTypesByChapterIds(@Argument List<UUID> chapterIds) {
         return contentService.getAchievableSkillTypesByChapterIds(chapterIds);
     }
 
