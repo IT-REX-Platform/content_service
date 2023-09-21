@@ -12,7 +12,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import java.util.UUID;
 
 @GraphQlApiTest
-class QuerySkillTypesAchievable {
+class QuerySkillTypesAchievableTest {
 
     @Autowired
     private ContentRepository contentRepository;
