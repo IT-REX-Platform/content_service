@@ -36,7 +36,7 @@ class QuerySkillTypesAchievableTest {
         graphQlTester.document(query)
                 .variable("chapterId", chapterId)
                 .execute()
-                .path("_internal_achievableSkillTypesByChapterIds[0][*]")
+                .path("_internal_noauth_achievableSkillTypesByChapterIds[0][*]")
                 .entityList(SkillType.class)
                 .contains(assessmentEntity1.getAssessmentMetadata().getSkillTypes().get(0),
                         assessmentEntity2.getAssessmentMetadata().getSkillTypes().get(0));
