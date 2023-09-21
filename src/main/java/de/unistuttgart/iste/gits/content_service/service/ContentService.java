@@ -57,8 +57,8 @@ public class ContentService {
      * Checks if a Content with the given id exists. If not, an EntityNotFoundException is thrown.
      *
      * @param id The id of the Content to check.
-     * @throws EntityNotFoundException If a Content with the given id does not exist.
      * @return The Content with the given id.
+     * @throws EntityNotFoundException If a Content with the given id does not exist.
      */
     public ContentEntity requireContentExisting(UUID id) {
         return contentRepository.findById(id)
@@ -347,5 +347,21 @@ public class ContentService {
                 .collect(Collectors.groupingBy(content -> content.getMetadata().getChapterId()));
     }
 
-
+    /**
+     * Returns a list of all skill types that are achievable by the user in the given chapters.
+     * A skill type is achievable if there exists at least one assessment in a chapter that has this skill type.
+     *
+     * @param chapterIds the ids of the chapters to check
+     * @return a list of all skill types that are achievable by the user in the given chapters.
+     * The order of the list will match the order of the given chapter ids.
+     */
+    public List<List<SkillType>> getAchievableSkillTypesByChapterIds(List<UUID> chapterIds) {
+        return chapterIds.stream()
+                .map(chapterId -> contentRepository.findSkillTypesByChapterId(chapterId)
+                        .stream()
+                        .flatMap(List::stream)
+                        .distinct()
+                        .toList())
+                .toList();
+    }
 }

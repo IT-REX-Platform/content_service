@@ -11,6 +11,7 @@ import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProg
 import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
 import de.unistuttgart.iste.gits.content_service.validation.ContentValidator;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
+import de.unistuttgart.iste.gits.generated.dto.SkillType;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
@@ -19,8 +20,12 @@ import org.springframework.test.context.ContextConfiguration;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
@@ -135,7 +140,6 @@ class ContentServiceTest {
         //execute method under test
         assertDoesNotThrow(() -> contentService.cascadeContentDeletion(dto));
 
-
         verify(contentRepository, times(1)).delete(argThat(content -> content.getId().equals(testEntity.getId())));
         verify(contentRepository, times(1)).delete(argThat(content -> content.getId().equals(testEntity2.getId())));
         verify(mockPublisher, times(2)).notifyChange(any(ContentEntity.class), eq(CrudOperation.DELETE));
@@ -173,5 +177,38 @@ class ContentServiceTest {
         //execute method under test
         assertThrows(IncompleteEventMessageException.class, () -> contentService.cascadeContentDeletion(nullListDto));
         assertThrows(IncompleteEventMessageException.class, () -> contentService.cascadeContentDeletion(noOperationDto));
+    }
+
+    @Test
+    void testSkillTypesByChapterId() {
+        UUID chapterId1 = UUID.randomUUID();
+        UUID chapterId2 = UUID.randomUUID();
+
+        when(contentRepository.findSkillTypesByChapterId(chapterId1)).thenReturn(
+                List.of(List.of(SkillType.REMEMBER), List.of(SkillType.UNDERSTAND, SkillType.REMEMBER))
+        );
+        when(contentRepository.findSkillTypesByChapterId(chapterId2)).thenReturn(
+                List.of(List.of(SkillType.APPLY, SkillType.REMEMBER))
+        );
+
+        var actualSkillTypes = contentService.getAchievableSkillTypesByChapterIds(List.of(chapterId1, chapterId2));
+
+        assertThat(actualSkillTypes, contains(
+                containsInAnyOrder(SkillType.REMEMBER, SkillType.UNDERSTAND),
+                containsInAnyOrder(SkillType.REMEMBER, SkillType.APPLY)
+        ));
+    }
+
+    @Test
+    void testSkillTypesByChapterIdNoSkillTypes() {
+        UUID chapterId = UUID.randomUUID();
+
+        when(contentRepository.findSkillTypesByChapterId(chapterId)).thenReturn(
+                List.of(List.of())
+        );
+
+        var actualSkillTypes = contentService.getAchievableSkillTypesByChapterIds(List.of(chapterId));
+
+        assertThat(actualSkillTypes, contains(is(empty())));
     }
 }

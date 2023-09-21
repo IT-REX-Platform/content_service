@@ -1,8 +1,10 @@
 package de.unistuttgart.iste.gits.content_service.persistence.repository;
 
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
+import de.unistuttgart.iste.gits.generated.dto.SkillType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +25,13 @@ public interface ContentRepository extends JpaRepository<ContentEntity, UUID> {
      * @return List of Content Entities that match the content IDs given as input
      */
     List<ContentEntity> findContentEntitiesByIdIn(List<UUID> contentIds);
+
+    /**
+     * Fetches all skill types for content in a chapter.
+     *
+     * @param chapterId the chapter id
+     * @return a list of skill types
+     */
+    @Query("select assessment.assessmentMetadata.skillTypes from Assessment assessment where assessment.metadata.chapterId = :chapterId")
+    List<List<SkillType>> findSkillTypesByChapterId(@Param("chapterId") UUID chapterId);
 }

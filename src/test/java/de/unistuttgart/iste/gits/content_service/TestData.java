@@ -79,4 +79,16 @@ public class TestData {
                 .build();
         return userProgressData;
     }
+
+    public static AssessmentEntity assessmentEntityWithSkillType(UUID chapterId, SkillType... skillTypes) {
+        return dummyAssessmentEntityBuilder()
+                .metadata(dummyContentMetadataEmbeddableBuilder()
+                        .chapterId(chapterId)
+                        .type(ContentType.FLASHCARDS)
+                        .build())
+                .assessmentMetadata(dummyAssessmentMetadataEmbeddableBuilder()
+                        .skillTypes(List.of(skillTypes))
+                        .build())
+                .build();
+    }
 }

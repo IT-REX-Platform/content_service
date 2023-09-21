@@ -200,6 +200,22 @@ also containing suggestions for media content (which do not have a skill type).
 
 </td>
 </tr>
+<tr>
+<td colspan="2" valign="top"><strong>_internal_achievableSkillTypesByChapterIds</strong></td>
+<td valign="top">[[<a href="#skilltype">SkillType</a>!]!]!</td>
+<td>
+
+
+Retrieves all skill types that are achievable for the given chapters.
+Each chapter will have its own list of skill types (batching query).
+
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">chapterIds</td>
+<td valign="top">[<a href="#uuid">UUID</a>!]!</td>
+<td></td>
+</tr>
 </tbody>
 </table>
 
