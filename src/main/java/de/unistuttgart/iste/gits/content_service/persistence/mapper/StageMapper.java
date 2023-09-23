@@ -12,7 +12,7 @@ public class StageMapper {
 
     private final ContentMapper contentMapper;
 
-    public Stage entityToDto(StageEntity entity) {
+    public Stage entityToDto(final StageEntity entity) {
         return Stage.builder()
                 .setId(entity.getId())
                 .setPosition(entity.getPosition())

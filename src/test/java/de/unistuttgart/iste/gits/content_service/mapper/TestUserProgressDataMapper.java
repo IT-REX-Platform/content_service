@@ -16,11 +16,11 @@ import static org.hamcrest.Matchers.*;
 
 class TestUserProgressDataMapper {
 
-    private UserProgressDataMapper userProgressDataMapper = new UserProgressDataMapper(new ModelMapper());
+    private final UserProgressDataMapper userProgressDataMapper = new UserProgressDataMapper(new ModelMapper());
 
     @Test
     void testFullMapping() {
-        UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
                 .userId(UUID.randomUUID())
                 .contentId(UUID.randomUUID())
                 .learningInterval(2)
@@ -33,7 +33,7 @@ class TestUserProgressDataMapper {
                                 .build()))
                 .build();
 
-        UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
+        final UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
 
         assertThat(actual.getUserId(), is(userProgressDataEntity.getUserId()));
         assertThat(actual.getContentId(), is(userProgressDataEntity.getContentId()));
@@ -54,7 +54,7 @@ class TestUserProgressDataMapper {
 
     @Test
     void testContentNotLearnedSuccessful() {
-        UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
                 .userId(UUID.randomUUID())
                 .contentId(UUID.randomUUID())
                 .learningInterval(2)
@@ -67,7 +67,7 @@ class TestUserProgressDataMapper {
                                 .build()))
                 .build();
 
-        UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
+        final UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
 
         assertThat(actual.getLastLearnDate(), is(nullValue()));
         assertThat(actual.getIsLearned(), is(false));
@@ -77,12 +77,12 @@ class TestUserProgressDataMapper {
 
     @Test
     void testContentNotLearnedYet() {
-        UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
                 .userId(UUID.randomUUID())
                 .contentId(UUID.randomUUID())
                 .learningInterval(2).build();
 
-        UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
+        final UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
 
         assertThat(actual.getLastLearnDate(), is(nullValue()));
         assertThat(actual.getIsLearned(), is(false));
@@ -92,7 +92,7 @@ class TestUserProgressDataMapper {
 
     @Test
     void testContentNotDueForRepetitionYet() {
-        UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity = UserProgressDataEntity.builder()
                 .userId(UUID.randomUUID())
                 .contentId(UUID.randomUUID())
                 .learningInterval(2)
@@ -105,7 +105,7 @@ class TestUserProgressDataMapper {
                                 .build()))
                 .build();
 
-        UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
+        final UserProgressData actual = userProgressDataMapper.entityToDto(userProgressDataEntity);
 
         assertThat(actual.getLastLearnDate(), is(not(nullValue())));
         assertThat(actual.getIsLearned(), is(true));

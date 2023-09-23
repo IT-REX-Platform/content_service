@@ -18,8 +18,8 @@ class QuerySkillTypesAchievableTest {
     private ContentRepository contentRepository;
 
     @Test
-    void testQuerySkillTypesByChapterId(GraphQlTester graphQlTester) {
-        UUID chapterId = UUID.randomUUID();
+    void testQuerySkillTypesByChapterId(final GraphQlTester graphQlTester) {
+        final UUID chapterId = UUID.randomUUID();
 
         AssessmentEntity assessmentEntity1 = TestData.assessmentEntityWithSkillType(chapterId, SkillType.UNDERSTAND);
         AssessmentEntity assessmentEntity2 = TestData.assessmentEntityWithSkillType(chapterId, SkillType.APPLY);
@@ -27,7 +27,7 @@ class QuerySkillTypesAchievableTest {
         assessmentEntity1 = contentRepository.save(assessmentEntity1);
         assessmentEntity2 = contentRepository.save(assessmentEntity2);
 
-        String query = """
+        final String query = """
                 query ($chapterId: UUID!) {
                     _internal_noauth_achievableSkillTypesByChapterIds(chapterIds: [$chapterId])
                 }

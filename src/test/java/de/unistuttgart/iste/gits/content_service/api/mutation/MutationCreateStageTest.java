@@ -23,8 +23,8 @@ class MutationCreateStageTest {
 
 
     @Test
-    void testStageCreation(GraphQlTester tester) {
-        List<UUID> contentIds = new ArrayList<>();
+    void testStageCreation(final GraphQlTester tester) {
+        final List<UUID> contentIds = new ArrayList<>();
 
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
@@ -33,12 +33,12 @@ class MutationCreateStageTest {
                 .build();
         sectionEntity = sectionRepository.save(sectionEntity);
 
-        CreateStageInput stageInput = CreateStageInput.builder()
+        final CreateStageInput stageInput = CreateStageInput.builder()
                 .setRequiredContents(contentIds)
                 .setOptionalContents(contentIds)
                 .build();
 
-        String query = """
+        final String query = """
                 mutation($id: UUID!, $input: CreateStageInput){
                     mutateSection(sectionId: $id){
                         createStage(input: $input) {

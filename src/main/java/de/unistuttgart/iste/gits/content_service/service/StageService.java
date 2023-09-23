@@ -25,9 +25,9 @@ public class StageService {
      * @param sectionId Section ID the Stage belongs to
      * @return created Stage
      */
-    public Stage createNewStage(UUID sectionId, CreateStageInput input) {
-        SectionEntity sectionEntity = requireSectionExisting(sectionId);
-        StageEntity stageEntity = StageEntity.builder()
+    public Stage createNewStage(final UUID sectionId, final CreateStageInput input) {
+        final SectionEntity sectionEntity = requireSectionExisting(sectionId);
+        final StageEntity stageEntity = StageEntity.builder()
                 .sectionId(sectionId)
                 .position(sectionEntity.getStages().size())
                 .requiredContents(validateStageContent(
@@ -47,9 +47,9 @@ public class StageService {
      * @param input Update Input. Fields must not be null
      * @return updated Stage
      */
-    public Stage updateStage(UpdateStageInput input) {
-        StageEntity stageEntity = requireStageExisting(input.getId());
-        SectionEntity sectionEntity = requireSectionExisting(stageEntity.getSectionId());
+    public Stage updateStage(final UpdateStageInput input) {
+        final StageEntity stageEntity = requireStageExisting(input.getId());
+        final SectionEntity sectionEntity = requireSectionExisting(stageEntity.getSectionId());
 
         // set updated Content
         stageEntity.setRequiredContents(
@@ -75,12 +75,12 @@ public class StageService {
      * @param contentIds List of Content IDs to be validated
      * @return Set of validated Content Entities
      */
-    private Set<ContentEntity> validateStageContent(UUID chapterId, List<UUID> contentIds) {
-        Set<ContentEntity> resultSet = new HashSet<>();
+    private Set<ContentEntity> validateStageContent(final UUID chapterId, final List<UUID> contentIds) {
+        final Set<ContentEntity> resultSet = new HashSet<>();
 
-        List<ContentEntity> contentEntities = contentRepository.findContentEntitiesByIdIn(contentIds);
+        final List<ContentEntity> contentEntities = contentRepository.findContentEntitiesByIdIn(contentIds);
 
-        for (ContentEntity contentEntity : contentEntities) {
+        for (final ContentEntity contentEntity : contentEntities) {
             // only add content that is located in the same chapter as the Work-Path / Stage
             if (contentEntity.getMetadata().getChapterId().equals(chapterId)) {
                 resultSet.add(contentEntity);
@@ -96,15 +96,15 @@ public class StageService {
      * @param stageId Stage ID to be removed
      * @return ID of deleted Stage
      */
-    public UUID deleteStage(UUID stageId) {
-        StageEntity deletedStageEntity = requireStageExisting(stageId);
+    public UUID deleteStage(final UUID stageId) {
+        final StageEntity deletedStageEntity = requireStageExisting(stageId);
 
-        SectionEntity sectionEntity = sectionRepository.getReferenceById(deletedStageEntity.getSectionId());
+        final SectionEntity sectionEntity = sectionRepository.getReferenceById(deletedStageEntity.getSectionId());
 
         sectionEntity.getStages().remove(deletedStageEntity);
 
         //if a stage is deleted all subsequent stages have to have their position moved up by 1 in the list
-        for (StageEntity entity : sectionEntity.getStages()) {
+        for (final StageEntity entity : sectionEntity.getStages()) {
 
             if (entity.getPosition() > deletedStageEntity.getPosition()) {
                 //move entity one position up
@@ -123,10 +123,10 @@ public class StageService {
      *
      * @param contentEntity a content Entity that is up for deletion
      */
-    public void deleteContentLinksFromStages(ContentEntity contentEntity) {
-        List<StageEntity> stageEntities = stageRepository.findAllByRequiredContentsContainingOrOptionalContentsContaining(contentEntity, contentEntity);
+    public void deleteContentLinksFromStages(final ContentEntity contentEntity) {
+        final List<StageEntity> stageEntities = stageRepository.findAllByRequiredContentsContainingOrOptionalContentsContaining(contentEntity, contentEntity);
 
-        for (StageEntity stageEntity : stageEntities) {
+        for (final StageEntity stageEntity : stageEntities) {
             stageEntity.getRequiredContents().remove(contentEntity);
             stageEntity.getOptionalContents().remove(contentEntity);
         }
@@ -141,7 +141,7 @@ public class StageService {
      * @return The StageEntity with the given id.
      * @throws EntityNotFoundException If the chapter does not exist.
      */
-    private StageEntity requireStageExisting(UUID uuid) {
+    private StageEntity requireStageExisting(final UUID uuid) {
         return stageRepository.findById(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Stage with id " + uuid + " not found"));
     }
@@ -153,7 +153,7 @@ public class StageService {
      * @return The SectionEntity with the given id.
      * @throws EntityNotFoundException If the chapter does not exist.
      */
-    private SectionEntity requireSectionExisting(UUID uuid) {
+    private SectionEntity requireSectionExisting(final UUID uuid) {
         return sectionRepository.findById(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Section with id " + uuid + " not found"));
     }

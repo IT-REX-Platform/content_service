@@ -5,13 +5,9 @@ import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.exception.IncompleteEventMessageException;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.StageEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.SectionMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.StageMapper;
+import de.unistuttgart.iste.gits.content_service.persistence.mapper.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
-import de.unistuttgart.iste.gits.generated.dto.CreateSectionInput;
-import de.unistuttgart.iste.gits.generated.dto.Section;
-import de.unistuttgart.iste.gits.generated.dto.Stage;
+import de.unistuttgart.iste.gits.generated.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -34,18 +30,18 @@ class SectionServiceTest {
     @Test
     void createSectionTest() {
         //init
-        CreateSectionInput input = CreateSectionInput.builder()
+        final CreateSectionInput input = CreateSectionInput.builder()
                 .setChapterId(UUID.randomUUID())
                 .setName("Test Section")
                 .build();
 
-        SectionEntity sectionEntity = SectionEntity.builder()
+        final SectionEntity sectionEntity = SectionEntity.builder()
                 .name(input.getName())
                 .id(UUID.randomUUID())
                 .chapterId(input.getChapterId())
                 .stages(new HashSet<>()).build();
 
-        Section expectedResult = Section.builder()
+        final Section expectedResult = Section.builder()
                 .setId(sectionEntity.getId())
                 .setName(sectionEntity.getName())
                 .setChapterId(sectionEntity.getChapterId())
@@ -56,7 +52,7 @@ class SectionServiceTest {
         when(sectionRepository.save(any())).thenReturn(sectionEntity);
 
         // execute method under test
-        Section result = sectionService.createSection(input);
+        final Section result = sectionService.createSection(input);
 
         assertEquals(expectedResult, result);
         assertEquals(expectedResult.getId(), result.getId());
@@ -67,22 +63,22 @@ class SectionServiceTest {
 
     @Test
     void updateSectionTest() {
-        UUID sectionId = UUID.randomUUID();
-        String newName = "Test Section";
+        final UUID sectionId = UUID.randomUUID();
+        final String newName = "Test Section";
 
-        SectionEntity oldSectionEntity = SectionEntity.builder()
+        final SectionEntity oldSectionEntity = SectionEntity.builder()
                 .name("This is a Section")
                 .id(sectionId)
                 .chapterId(UUID.randomUUID())
                 .stages(new HashSet<>()).build();
 
-        SectionEntity newSectionEntity = SectionEntity.builder()
+        final SectionEntity newSectionEntity = SectionEntity.builder()
                 .name(newName)
                 .id(sectionId)
                 .chapterId(oldSectionEntity.getChapterId())
                 .stages(new HashSet<>()).build();
 
-        Section expectedResult = Section.builder()
+        final Section expectedResult = Section.builder()
                 .setId(newSectionEntity.getId())
                 .setName(newSectionEntity.getName())
                 .setChapterId(newSectionEntity.getChapterId())
@@ -95,7 +91,7 @@ class SectionServiceTest {
         when(sectionRepository.save(newSectionEntity)).thenReturn(newSectionEntity);
 
         // execute method under test
-        Section result = sectionService.updateSectionName(sectionId, newName);
+        final Section result = sectionService.updateSectionName(sectionId, newName);
 
         verify(sectionRepository, times(1)).save(newSectionEntity);
 
@@ -108,8 +104,8 @@ class SectionServiceTest {
 
     @Test
     void updateNoneExistingSectionTest() {
-        UUID sectionId = UUID.randomUUID();
-        String newName = "Test Section";
+        final UUID sectionId = UUID.randomUUID();
+        final String newName = "Test Section";
 
         //mock database
         when(sectionRepository.existsById(sectionId)).thenReturn(false);
@@ -121,13 +117,13 @@ class SectionServiceTest {
     @Test
     void cascadeSectionDeletionWithValidData() {
         // Initialize a ChapterChangeEvent DTO with valid data
-        ChapterChangeEvent dto = ChapterChangeEvent.builder()
+        final ChapterChangeEvent dto = ChapterChangeEvent.builder()
                 .chapterIds(Collections.singletonList(UUID.randomUUID()))
                 .operation(CrudOperation.DELETE)
                 .build();
 
         // Create a list of SectionEntity objects to mock the repository's response
-        SectionEntity sectionEntity = SectionEntity.builder()
+        final SectionEntity sectionEntity = SectionEntity.builder()
                 .id(UUID.randomUUID())
                 .chapterId(dto.getChapterIds().get(0))
                 .build();
@@ -147,7 +143,7 @@ class SectionServiceTest {
     @Test
     void cascadeSectionDeletionWithIncompleteData() {
         // Initialize a ChapterChangeEvent DTO with incomplete data
-        ChapterChangeEvent dto = ChapterChangeEvent.builder()
+        final ChapterChangeEvent dto = ChapterChangeEvent.builder()
                 .chapterIds(Collections.emptyList())
                 .operation(null)
                 .build();
@@ -163,10 +159,10 @@ class SectionServiceTest {
     // case: update Section with existing Stages
     @Test
     void updateSectionWithStagesTest() {
-        UUID sectionId = UUID.randomUUID();
-        String newName = "Test Section";
+        final UUID sectionId = UUID.randomUUID();
+        final String newName = "Test Section";
 
-        SectionEntity oldSectionEntity = SectionEntity.builder()
+        final SectionEntity oldSectionEntity = SectionEntity.builder()
                 .name("This is a Section")
                 .id(sectionId)
                 .chapterId(UUID.randomUUID())
@@ -177,7 +173,7 @@ class SectionServiceTest {
                         )
                 ).build();
 
-        SectionEntity newSectionEntity = SectionEntity.builder()
+        final SectionEntity newSectionEntity = SectionEntity.builder()
                 .name(newName)
                 .id(sectionId)
                 .chapterId(oldSectionEntity.getChapterId())
@@ -185,7 +181,7 @@ class SectionServiceTest {
                 .build();
 
 
-        Section expectedResult = Section.builder()
+        final Section expectedResult = Section.builder()
                 .setId(newSectionEntity.getId())
                 .setName(newSectionEntity.getName())
                 .setChapterId(newSectionEntity.getChapterId())
@@ -200,7 +196,7 @@ class SectionServiceTest {
         when(sectionRepository.save(any())).thenReturn(newSectionEntity);
 
         // execute method under test
-        Section result = sectionService.updateSectionName(sectionId, newName);
+        final Section result = sectionService.updateSectionName(sectionId, newName);
 
         verify(sectionRepository, times(1)).save(newSectionEntity);
 
@@ -213,13 +209,13 @@ class SectionServiceTest {
 
     @Test
     void deleteSection() {
-        UUID input = UUID.randomUUID();
+        final UUID input = UUID.randomUUID();
 
         //mock database
         when(sectionRepository.existsById(input)).thenReturn(true);
         doNothing().when(sectionRepository).deleteById(input);
 
-        UUID result = sectionService.deleteWorkPath(input);
+        final UUID result = sectionService.deleteWorkPath(input);
 
         verify(sectionRepository, times(1)).deleteById(input);
         assertEquals(input, result);
@@ -227,7 +223,7 @@ class SectionServiceTest {
 
     @Test
     void deleteInvalidIdSection() {
-        UUID input = UUID.randomUUID();
+        final UUID input = UUID.randomUUID();
 
         //mock database
         when(sectionRepository.existsById(input)).thenReturn(false);
@@ -240,35 +236,35 @@ class SectionServiceTest {
     @Test
     void reorderStagesTest() {
 
-        UUID sectionId = UUID.randomUUID();
+        final UUID sectionId = UUID.randomUUID();
 
-        Set<StageEntity> stageEntities = Set.of(
+        final Set<StageEntity> stageEntities = Set.of(
                 buildStageEntity(sectionId, 0),
                 buildStageEntity(sectionId, 1),
                 buildStageEntity(sectionId, 2),
                 buildStageEntity(sectionId, 3)
         );
 
-        SectionEntity sectionEntity = SectionEntity.builder()
+        final SectionEntity sectionEntity = SectionEntity.builder()
                 .id(sectionId)
                 .name("Section 1")
                 .chapterId(UUID.randomUUID())
                 .stages(stageEntities)
                 .build();
 
-        List<UUID> sortedStageIds = stageEntities.stream().map(StageEntity::getId).sorted().toList();
+        final List<UUID> sortedStageIds = stageEntities.stream().map(StageEntity::getId).sorted().toList();
 
 
         //mock database
         when(sectionRepository.getReferenceById(sectionId)).thenReturn(sectionEntity);
         when(sectionRepository.save(any())).thenReturn(sectionEntity);
 
-        Section result = sectionService.reorderStages(sectionId, sortedStageIds);
+        final Section result = sectionService.reorderStages(sectionId, sortedStageIds);
 
         verify(sectionRepository, times(1)).getReferenceById(sectionId);
         verify(sectionRepository, times(1)).save(any());
 
-        for (Stage stage : result.getStages()) {
+        for (final Stage stage : result.getStages()) {
             assertEquals(sortedStageIds.indexOf(stage.getId()), stage.getPosition());
         }
     }
@@ -277,23 +273,23 @@ class SectionServiceTest {
     @Test
     void reorderStagesInvalidStageListTest() {
 
-        UUID sectionId = UUID.randomUUID();
+        final UUID sectionId = UUID.randomUUID();
 
-        List<StageEntity> stageEntities = List.of(
+        final List<StageEntity> stageEntities = List.of(
                 buildStageEntity(sectionId, 0),
                 buildStageEntity(sectionId, 1),
                 buildStageEntity(sectionId, 2),
                 buildStageEntity(sectionId, 3)
         );
 
-        SectionEntity sectionEntity = SectionEntity.builder()
+        final SectionEntity sectionEntity = SectionEntity.builder()
                 .id(sectionId)
                 .name("Section 1")
                 .chapterId(UUID.randomUUID())
                 .stages(Set.copyOf(stageEntities.subList(0, 2)))
                 .build();
 
-        List<UUID> sortedStageIds = stageEntities.stream()
+        final List<UUID> sortedStageIds = stageEntities.stream()
                 .map(StageEntity::getId)
                 .sorted()
                 .toList();
@@ -310,23 +306,23 @@ class SectionServiceTest {
     @Test
     void reorderStagesIncompleteStageListTest() {
 
-        UUID sectionId = UUID.randomUUID();
+        final UUID sectionId = UUID.randomUUID();
 
-        List<StageEntity> stageEntities = List.of(
+        final List<StageEntity> stageEntities = List.of(
                 buildStageEntity(sectionId, 0),
                 buildStageEntity(sectionId, 1),
                 buildStageEntity(sectionId, 2),
                 buildStageEntity(sectionId, 3)
         );
 
-        SectionEntity sectionEntity = SectionEntity.builder()
+        final SectionEntity sectionEntity = SectionEntity.builder()
                 .id(sectionId)
                 .name("Work-Path 1")
                 .chapterId(UUID.randomUUID())
                 .stages(Set.copyOf(stageEntities))
                 .build();
 
-        List<UUID> sortedStageIds = stageEntities.subList(0, 2)
+        final List<UUID> sortedStageIds = stageEntities.subList(0, 2)
                 .stream()
                 .map(StageEntity::getId)
                 .sorted()
@@ -340,7 +336,7 @@ class SectionServiceTest {
 
     }
 
-    private StageEntity buildStageEntity(UUID sectionId, int pos) {
+    private StageEntity buildStageEntity(final UUID sectionId, final int pos) {
         return StageEntity.builder()
                 .id(UUID.randomUUID())
                 .sectionId(sectionId)

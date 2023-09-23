@@ -30,7 +30,7 @@ public class TopicPublisher {
      *
      * @param dto message
      */
-    protected void publishEvent(Object dto, String topic) {
+    protected void publishEvent(final Object dto, final String topic) {
         client.publishEvent(PUBSUB_NAME, topic, dto)
                 .doOnSuccess(response -> log.debug("Published message to topic {}: {}", topic, response))
                 .doOnError(error -> log.error("Error while publishing message to topic {}: {}", topic, error.getMessage()))
@@ -43,8 +43,8 @@ public class TopicPublisher {
      * @param contentEntity changed entity
      * @param operation     type of CRUD operation performed on entity
      */
-    public void notifyChange(ContentEntity contentEntity, CrudOperation operation) {
-        CourseAssociationEvent dto = CourseAssociationEvent.builder()
+    public void notifyChange(final ContentEntity contentEntity, final CrudOperation operation) {
+        final CourseAssociationEvent dto = CourseAssociationEvent.builder()
                 .resourceId(contentEntity.getId())
                 .chapterIds(List.of(contentEntity.getMetadata().getChapterId()))
                 .operation(operation)
@@ -53,8 +53,8 @@ public class TopicPublisher {
         publishEvent(dto, TOPIC_RESOURCE_ASSOCIATION);
     }
 
-    public void informContentDependentServices(List<UUID> contentEntityIds, CrudOperation operation) {
-        ContentChangeEvent dto = ContentChangeEvent.builder()
+    public void informContentDependentServices(final List<UUID> contentEntityIds, final CrudOperation operation) {
+        final ContentChangeEvent dto = ContentChangeEvent.builder()
                 .contentIds(contentEntityIds)
                 .operation(operation)
                 .build();
@@ -69,8 +69,8 @@ public class TopicPublisher {
      * @param chapterIds chapters the resource is present in
      * @param operation  type of CRUD operation performed
      */
-    public void forwardChange(UUID resourceId, List<UUID> chapterIds, CrudOperation operation) {
-        CourseAssociationEvent dto = CourseAssociationEvent.builder()
+    public void forwardChange(final UUID resourceId, final List<UUID> chapterIds, final CrudOperation operation) {
+        final CourseAssociationEvent dto = CourseAssociationEvent.builder()
                 .resourceId(resourceId)
                 .chapterIds(chapterIds)
                 .operation(operation)
@@ -86,7 +86,7 @@ public class TopicPublisher {
      *
      * @param event the event to forward
      */
-    public void forwardContentProgressed(UserProgressLogEvent event) {
+    public void forwardContentProgressed(final UserProgressLogEvent event) {
         publishEvent(event, USER_PROGRESS_UPDATED);
     }
 

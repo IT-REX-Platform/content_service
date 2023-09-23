@@ -23,8 +23,8 @@ class QueryByChapterIdTest {
      * Then the content is returned, correctly grouped and filtered by chapterId
      */
     @Test
-    void testQueryByChapterId(GraphQlTester graphQlTester) {
-        List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+    void testQueryByChapterId(final GraphQlTester graphQlTester) {
+        final List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
 
         chapterIds.stream()
                 .<ContentEntity>map(chapterId -> (
@@ -35,7 +35,7 @@ class QueryByChapterIdTest {
                         .build())
                 .forEach(contentRepository::save);
 
-        String query = """
+        final String query = """
                 query($chapterIds: [UUID!]!) {
                     contentsByChapterIds(chapterIds: $chapterIds) {
                         id

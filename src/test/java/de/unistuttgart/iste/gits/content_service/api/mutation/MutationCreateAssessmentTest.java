@@ -52,9 +52,9 @@ class MutationCreateAssessmentTest {
     @Test
     @Transactional
     @Commit
-    void testCreateAssessment(GraphQlTester graphQlTester) {
-        UUID chapterId = UUID.randomUUID();
-        String query = """
+    void testCreateAssessment(final GraphQlTester graphQlTester) {
+        final UUID chapterId = UUID.randomUUID();
+        final String query = """
                 mutation($chapterId: UUID!) {
                     createAssessment(input: {
                         metadata: {
@@ -89,7 +89,7 @@ class MutationCreateAssessmentTest {
                 }
                 """;
 
-        FlashcardSetAssessment createdAssessment = graphQlTester.document(query)
+        final FlashcardSetAssessment createdAssessment = graphQlTester.document(query)
                 .variable("chapterId", chapterId)
                 .execute()
                 .path("createAssessment").entity(FlashcardSetAssessment.class).get();
@@ -107,10 +107,10 @@ class MutationCreateAssessmentTest {
         assertThat(createdAssessment.getAssessmentMetadata().getSkillTypes(), is(List.of(SkillType.REMEMBER)));
         assertThat(createdAssessment.getAssessmentMetadata().getInitialLearningInterval(), is(2));
 
-        ContentEntity contentEntity = contentRepository.findById(createdAssessment.getId()).orElseThrow();
+        final ContentEntity contentEntity = contentRepository.findById(createdAssessment.getId()).orElseThrow();
         assertThat(contentEntity, is(instanceOf(AssessmentEntity.class)));
 
-        AssessmentEntity assessmentEntity = (AssessmentEntity) contentEntity;
+        final AssessmentEntity assessmentEntity = (AssessmentEntity) contentEntity;
 
         // check that assessment entity is correct
         assertThat(assessmentEntity.getMetadata().getName(), is("name"));
@@ -135,8 +135,8 @@ class MutationCreateAssessmentTest {
      * Then a ValidationException is thrown
      */
     @Test
-    void testCreateAssessmentWithMediaContentType(GraphQlTester graphQlTester) {
-        String query = """
+    void testCreateAssessmentWithMediaContentType(final GraphQlTester graphQlTester) {
+        final String query = """
                 mutation {
                     createAssessment(input: {
                         metadata: {

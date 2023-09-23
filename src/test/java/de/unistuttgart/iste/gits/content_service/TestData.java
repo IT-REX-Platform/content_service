@@ -40,7 +40,7 @@ public class TestData {
                 .type(ContentType.MEDIA);
     }
 
-    public static MediaContentEntity buildContentEntity(UUID chapterId) {
+    public static MediaContentEntity buildContentEntity(final UUID chapterId) {
         return MediaContentEntity.builder()
                 .id(UUID.randomUUID())
                 .metadata(
@@ -63,15 +63,15 @@ public class TestData {
      * @param contentId ID of the Content the Progress is tracked for
      * @return database representation of a Progress data Item
      */
-    public static UserProgressDataEntity buildDummyUserProgressData(boolean success, UUID userId, UUID contentId) {
-        ProgressLogItemEmbeddable logItem = ProgressLogItemEmbeddable.builder()
+    public static UserProgressDataEntity buildDummyUserProgressData(final boolean success, final UUID userId, final UUID contentId) {
+        final ProgressLogItemEmbeddable logItem = ProgressLogItemEmbeddable.builder()
                 .correctness(70.00)
                 .timestamp(OffsetDateTime.now())
                 .hintsUsed(0)
                 .success(success)
                 .timeToComplete(null)
                 .build();
-        UserProgressDataEntity userProgressData = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressData = UserProgressDataEntity.builder()
                 .userId(userId)
                 .contentId(contentId)
                 .progressLog(List.of(logItem))
@@ -80,7 +80,7 @@ public class TestData {
         return userProgressData;
     }
 
-    public static AssessmentEntity assessmentEntityWithSkillType(UUID chapterId, SkillType... skillTypes) {
+    public static AssessmentEntity assessmentEntityWithSkillType(final UUID chapterId, final SkillType... skillTypes) {
         return dummyAssessmentEntityBuilder()
                 .metadata(dummyContentMetadataEmbeddableBuilder()
                         .chapterId(chapterId)

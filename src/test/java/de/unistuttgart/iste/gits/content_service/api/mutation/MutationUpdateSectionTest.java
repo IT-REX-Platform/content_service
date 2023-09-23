@@ -23,7 +23,7 @@ class MutationUpdateSectionTest {
     private SectionRepository sectionRepository;
 
     @Test
-    void testSectionUpdate(GraphQlTester tester){
+    void testSectionUpdate(final GraphQlTester tester){
 
         // fill database
         SectionEntity sectionEntity = SectionEntity.builder()
@@ -33,9 +33,9 @@ class MutationUpdateSectionTest {
                 .build();
         sectionEntity = sectionRepository.save(sectionEntity);
 
-        String newName = "New Name";
+        final String newName = "New Name";
 
-        String query = """
+        final String query = """
                 mutation ($id: UUID!, $name: String!){
                     mutateSection(sectionId: $id){
                         updateSectionName(name: $name){
@@ -51,7 +51,7 @@ class MutationUpdateSectionTest {
                 }
                 """;
 
-        SectionEntity finalSectionEntity = sectionEntity;
+        final SectionEntity finalSectionEntity = sectionEntity;
 
         tester.document(query)
                 .variable("id", sectionEntity.getId())

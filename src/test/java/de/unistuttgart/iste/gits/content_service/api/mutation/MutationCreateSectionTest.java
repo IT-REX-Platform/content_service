@@ -16,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class MutationCreateSectionTest {
 
     @Test
-    void testSectionCreation(GraphQlTester tester){
-        CreateSectionInput input = CreateSectionInput.builder()
+    void testSectionCreation(final GraphQlTester tester){
+        final CreateSectionInput input = CreateSectionInput.builder()
                 .setChapterId(UUID.randomUUID())
                 .setName("Test Section")
                 .build();
-        String query = """
+        final String query = """
                 mutation ($input: CreateSectionInput!){
                     createSection(input: $input){
                     id

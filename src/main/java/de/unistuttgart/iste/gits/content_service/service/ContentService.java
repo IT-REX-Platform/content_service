@@ -14,10 +14,13 @@ import de.unistuttgart.iste.gits.generated.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static de.unistuttgart.iste.gits.common.util.GitsCollectionUtils.groupIntoSubLists;
 
 @Service
 @RequiredArgsConstructor
@@ -44,10 +47,10 @@ public class ContentService {
      * @param uuid ID of Content
      * @return ID of removed Content Entity
      */
-    public UUID deleteContent(UUID uuid) {
-        ContentEntity deletedEntity = requireContentExisting(uuid);
+    public UUID deleteContent(final UUID uuid) {
+        final ContentEntity deletedEntity = requireContentExisting(uuid);
 
-        UUID removedId = deleteContentAndRemoveDependencies(deletedEntity);
+        final UUID removedId = deleteContentAndRemoveDependencies(deletedEntity);
 
         topicPublisher.informContentDependentServices(List.of(removedId), CrudOperation.DELETE);
         return uuid;
@@ -60,7 +63,7 @@ public class ContentService {
      * @return The Content with the given id.
      * @throws EntityNotFoundException If a Content with the given id does not exist.
      */
-    public ContentEntity requireContentExisting(UUID id) {
+    public ContentEntity requireContentExisting(final UUID id) {
         return contentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Content with id " + id + " not found"));
     }
@@ -74,10 +77,10 @@ public class ContentService {
      * The order of the contents will match the order of the given ids.
      * @throws EntityNotFoundException If a content with a given id does not exist.
      */
-    public List<Content> getContentsById(List<UUID> ids) {
-        List<Content> contents = findContentsById(ids);
+    public List<Content> getContentsById(final List<UUID> ids) {
+        final List<Content> contents = findContentsById(ids);
 
-        List<UUID> notFound = new ArrayList<>();
+        final List<UUID> notFound = new ArrayList<>();
         for (int i = 0; i < contents.size(); i++) {
             if (contents.get(i) == null) {
                 notFound.add(ids.get(i));
@@ -103,33 +106,24 @@ public class ContentService {
      * @return a list of nullable contents. The size of the list will be the same as the size of the given list.
      * The order of the contents will match the order of the given ids.
      */
-    public List<Content> findContentsById(List<UUID> ids) {
+    public List<Content> findContentsById(final List<UUID> ids) {
         return ids.stream()
                 .map(contentRepository::findById)
-                .map(optionalContent -> optionalContent.map(contentMapper::entityToDto))
-                .map(optionalContent -> optionalContent.orElse(null))
+                // map to content dto or null if content does not exist
+                .map(optionalContent -> optionalContent.map(contentMapper::entityToDto).orElse(null))
                 .toList();
     }
 
-    public List<List<Content>> getContentsByChapterIds(List<UUID> chapterIds) {
-        List<List<Content>> result = new ArrayList<>(chapterIds.size());
+    public List<List<Content>> getContentsByChapterIds(final List<UUID> chapterIds) {
+        final List<Content> allMatchingContents = contentRepository.findByChapterIdIn(chapterIds)
+                .stream()
+                .map(contentMapper::entityToDto)
+                .toList();
 
-        // get a list containing all contents with a matching chapter id, then map them by chapter id (multiple
-        // contents might have the same chapter id)
-        Map<UUID, List<Content>> contentsByChapterId = getContentEntitiesSortedByChapterId(chapterIds);
-
-        // put the different groups of chapters into the result list such that the order matches the order
-        // of chapter ids given by the chapterIds argument
-        for (UUID chapterId : chapterIds) {
-            List<Content> contents = contentsByChapterId.getOrDefault(chapterId, Collections.emptyList());
-
-            result.add(contents);
-        }
-
-        return result;
+        return groupIntoSubLists(allMatchingContents, chapterIds, content -> content.getMetadata().getChapterId());
     }
 
-    private ContentPayload createContentPayload(List<Content> contents) {
+    private ContentPayload createContentPayload(final List<Content> contents) {
         // this is temporary until we have a proper pagination implementation
         return new ContentPayload(contents, PaginationUtil.unpagedPaginationInfo(contents.size()));
     }
@@ -141,10 +135,10 @@ public class ContentService {
      * @param tagName name of Tag
      * @return DTO with updated Content Entity
      */
-    public Content addTagToContent(UUID id, String tagName) {
+    public Content addTagToContent(final UUID id, final String tagName) {
         ContentEntity content = requireContentExisting(id);
 
-        Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
+        final Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
         newTags.add(tagName);
         content.getMetadata().setTags(newTags);
         content = contentRepository.save(content);
@@ -158,10 +152,10 @@ public class ContentService {
      * @param tagName name of the Tag
      * @return DTO with updated Content Entity
      */
-    public Content removeTagFromContent(UUID id, String tagName) {
+    public Content removeTagFromContent(final UUID id, final String tagName) {
         ContentEntity content = requireContentExisting(id);
 
-        Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
+        final Set<String> newTags = new HashSet<>(content.getMetadata().getTags());
         newTags.remove(tagName);
         content.getMetadata().setTags(newTags);
         content = contentRepository.save(content);
@@ -175,9 +169,9 @@ public class ContentService {
      * @param input to be used as basis of creation
      * @return DTO with created Assessment Entity
      */
-    public MediaContent createMediaContent(CreateMediaContentInput input) {
+    public MediaContent createMediaContent(final CreateMediaContentInput input) {
         contentValidator.validateCreateMediaContentInput(input);
-        ContentEntity contentEntity = contentMapper.mediaContentDtoToEntity(input);
+        final ContentEntity contentEntity = contentMapper.mediaContentDtoToEntity(input);
         return contentMapper.mediaContentEntityToDto(createContent(contentEntity));
     }
 
@@ -187,10 +181,10 @@ public class ContentService {
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
-    public MediaContent updateMediaContent(UUID contentId, UpdateMediaContentInput input) {
+    public MediaContent updateMediaContent(final UUID contentId, final UpdateMediaContentInput input) {
         contentValidator.validateUpdateMediaContentInput(input);
 
-        ContentEntity oldContentEntity = requireContentExisting(contentId);
+        final ContentEntity oldContentEntity = requireContentExisting(contentId);
         ContentEntity updatedContentEntity = contentMapper.mediaContentDtoToEntity(contentId, input,
                 oldContentEntity.getMetadata().getType());
 
@@ -204,10 +198,10 @@ public class ContentService {
      * @param input to be used as basis of creation
      * @return DTO with created Assessment Entity
      */
-    public Assessment createAssessment(CreateAssessmentInput input) {
+    public Assessment createAssessment(final CreateAssessmentInput input) {
         contentValidator.validateCreateAssessmentContentInput(input);
 
-        ContentEntity contentEntity = createContent(contentMapper.assessmentDtoToEntity(input));
+        final ContentEntity contentEntity = createContent(contentMapper.assessmentDtoToEntity(input));
         return contentMapper.assessmentEntityToDto(contentEntity);
     }
 
@@ -217,10 +211,10 @@ public class ContentService {
      * @param input containing updated version of entity
      * @return DTO with updated entity
      */
-    public Assessment updateAssessment(UUID contentId, UpdateAssessmentInput input) {
+    public Assessment updateAssessment(final UUID contentId, final UpdateAssessmentInput input) {
         contentValidator.validateUpdateAssessmentContentInput(input);
 
-        ContentEntity oldContentEntity = requireContentExisting(contentId);
+        final ContentEntity oldContentEntity = requireContentExisting(contentId);
         ContentEntity updatedContentEntity = contentMapper.assessmentDtoToEntity(contentId, input,
                 oldContentEntity.getMetadata().getType());
 
@@ -251,7 +245,7 @@ public class ContentService {
      * @param <T>                  all Entities that inherit from content Entity
      * @return entity saved
      */
-    private <T extends ContentEntity> T updateContent(T oldContentEntity, T updatedContentEntity) {
+    private <T extends ContentEntity> T updateContent(final T oldContentEntity, T updatedContentEntity) {
         updatedContentEntity = contentRepository.save(updatedContentEntity);
 
         // if the content is assigned to a different chapter course Links need to be potentially updated and therefore an Update request is sent to the resource services
@@ -267,7 +261,7 @@ public class ContentService {
      *
      * @param dto resource update dto
      */
-    public void forwardResourceUpdates(ResourceUpdateEvent dto) throws IncompleteEventMessageException {
+    public void forwardResourceUpdates(final ResourceUpdateEvent dto) throws IncompleteEventMessageException {
 
         // completeness check of input
         if (dto.getEntityId() == null || dto.getContentIds() == null || dto.getOperation() == null) {
@@ -275,10 +269,9 @@ public class ContentService {
         }
 
         // find all chapter IDs
-        List<UUID> contentEntityIds = contentRepository.findAllById(dto.getContentIds())
+        final List<UUID> contentEntityIds = contentRepository.findAllById(dto.getContentIds())
                 .stream()
-                .map(contentEntity -> contentEntity.getMetadata()
-                        .getChapterId())
+                .map(contentEntity -> contentEntity.getMetadata().getChapterId())
                 .toList();
 
 
@@ -290,11 +283,9 @@ public class ContentService {
      *
      * @param dto message containing information about to be deleted entities
      */
-    public void cascadeContentDeletion(ChapterChangeEvent dto) throws IncompleteEventMessageException {
-        List<UUID> chapterIds;
-        List<UUID> contentIds = new ArrayList<>();
-
-        chapterIds = dto.getChapterIds();
+    public void cascadeContentDeletion(final ChapterChangeEvent dto) throws IncompleteEventMessageException {
+        final List<UUID> contentIds = new ArrayList<>();
+        final List<UUID> chapterIds = dto.getChapterIds();
 
         // make sure message is complete
         if (chapterIds == null || chapterIds.isEmpty() || dto.getOperation() == null) {
@@ -306,9 +297,9 @@ public class ContentService {
             return;
         }
 
-        List<ContentEntity> contentEntities = contentRepository.findByChapterIdIn(chapterIds);
+        final List<ContentEntity> contentEntities = contentRepository.findByChapterIdIn(chapterIds);
 
-        for (ContentEntity entity : contentEntities) {
+        for (final ContentEntity entity : contentEntities) {
             // remove all links from stages to content
             // and collect IDs of deleted content entities
             contentIds.add(deleteContentAndRemoveDependencies(entity));
@@ -328,7 +319,7 @@ public class ContentService {
      * @param contentEntity content entity to be deleted
      * @return the ID of the deleted content entity
      */
-    private UUID deleteContentAndRemoveDependencies(ContentEntity contentEntity) {
+    private UUID deleteContentAndRemoveDependencies(final ContentEntity contentEntity) {
         userProgressDataRepository.deleteByContentId(contentEntity.getId());
         // remove content from sections
         stageService.deleteContentLinksFromStages(contentEntity);
@@ -341,12 +332,6 @@ public class ContentService {
         return contentEntity.getId();
     }
 
-    public Map<UUID, List<Content>> getContentEntitiesSortedByChapterId(List<UUID> chapterIds) {
-        return contentRepository.findByChapterIdIn(chapterIds).stream()
-                .map(contentMapper::entityToDto)
-                .collect(Collectors.groupingBy(content -> content.getMetadata().getChapterId()));
-    }
-
     /**
      * Returns a list of all skill types that are achievable by the user in the given chapters.
      * A skill type is achievable if there exists at least one assessment in a chapter that has this skill type.
@@ -355,13 +340,20 @@ public class ContentService {
      * @return a list of all skill types that are achievable by the user in the given chapters.
      * The order of the list will match the order of the given chapter ids.
      */
-    public List<List<SkillType>> getAchievableSkillTypesByChapterIds(List<UUID> chapterIds) {
+    public List<List<SkillType>> getAchievableSkillTypesByChapterIds(final List<UUID> chapterIds) {
         return chapterIds.stream()
-                .map(chapterId -> contentRepository.findSkillTypesByChapterId(chapterId)
-                        .stream()
-                        .flatMap(List::stream)
-                        .distinct()
-                        .toList())
+                .map(this::getSkillTypesOfChapter)
+                .toList();
+    }
+
+    @NotNull
+    private List<SkillType> getSkillTypesOfChapter(final UUID chapterId) {
+        return contentRepository.findSkillTypesByChapterId(chapterId)
+                .stream()
+                // each content has a list of skill types, so we have to flatten the list of lists of skill types
+                .flatMap(List::stream)
+                // remove duplicates
+                .distinct()
                 .toList();
     }
 }

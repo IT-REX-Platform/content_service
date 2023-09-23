@@ -32,11 +32,11 @@ class QuerySuggestionsTest {
      * Then the suggestions are returned
      */
     @Test
-    void testSuggestions(HttpGraphQlTester graphQlTester) {
-        UUID userId = UUID.randomUUID();
-        UUID chapterId = UUID.randomUUID();
+    void testSuggestions(final HttpGraphQlTester graphQlTester) {
+        final UUID userId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
 
-        String currentUser = """
+        final String currentUser = """
                 {
                     "id": "%s",
                     "userName": "MyUserName",
@@ -47,13 +47,13 @@ class QuerySuggestionsTest {
                 """.formatted(userId.toString());
 
         // Arrange
-        SectionEntity testSection = sectionRepository.save(SectionEntity.builder()
+        final SectionEntity testSection = sectionRepository.save(SectionEntity.builder()
                 .name("Test Section")
                 .chapterId(chapterId)
                 .stages(Set.of())
                 .build());
 
-        StageEntity testStage = stageRepository.save(
+        final StageEntity testStage = stageRepository.save(
                 StageEntity.builder()
                         .position(1)
                         .sectionId(testSection.getId())
@@ -86,7 +86,7 @@ class QuerySuggestionsTest {
                         .optionalContents(Set.of())
                         .build());
 
-        String query = """
+        final String query = """
                 query($chapterIds: [UUID!]!) {
                     suggestionsByChapterIds(chapterIds: $chapterIds, amount: 2) {
                         type

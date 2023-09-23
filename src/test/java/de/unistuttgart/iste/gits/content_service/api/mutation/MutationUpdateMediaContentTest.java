@@ -35,12 +35,12 @@ class MutationUpdateMediaContentTest {
     @Test
     @Transactional
     @Commit
-    void testUpdateMediaContent(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(
+    void testUpdateMediaContent(final GraphQlTester graphQlTester) {
+        final ContentEntity contentEntity = contentRepository.save(
                 TestData.dummyMediaContentEntityBuilder().build());
-        UUID newChapterId = UUID.randomUUID();
+        final UUID newChapterId = UUID.randomUUID();
 
-        String query = """
+        final String query = """
                 mutation($contentId: UUID!, $chapterId: UUID!) {
                     mutateContent(contentId: $contentId){
                         updateMediaContent(input: {
@@ -67,7 +67,7 @@ class MutationUpdateMediaContentTest {
                 }
                 """;
 
-        MediaContent updatedMediaContent = graphQlTester.document(query)
+        final MediaContent updatedMediaContent = graphQlTester.document(query)
                 .variable("contentId", contentEntity.getId())
                 .variable("chapterId", newChapterId)
                 .execute()
@@ -83,10 +83,10 @@ class MutationUpdateMediaContentTest {
         assertThat(updatedMediaContent.getMetadata().getChapterId(), is(newChapterId));
         assertThat(updatedMediaContent.getMetadata().getRewardPoints(), is(3));
 
-        ContentEntity newContentEntity = contentRepository.findById(updatedMediaContent.getId()).orElseThrow();
+        final ContentEntity newContentEntity = contentRepository.findById(updatedMediaContent.getId()).orElseThrow();
         assertThat(newContentEntity, is(instanceOf(MediaContentEntity.class)));
 
-        MediaContentEntity mediaContentEntity = (MediaContentEntity) newContentEntity;
+        final MediaContentEntity mediaContentEntity = (MediaContentEntity) newContentEntity;
 
         // check that mediaContent entity is correct
         assertThat(mediaContentEntity.getMetadata().getName(), is("newName"));
@@ -106,15 +106,15 @@ class MutationUpdateMediaContentTest {
     @Test
     @Transactional
     @Commit
-    void testUpdateContentWithTagsCorrectly(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(
+    void testUpdateContentWithTagsCorrectly(final GraphQlTester graphQlTester) {
+        final ContentEntity contentEntity = contentRepository.save(
                 TestData.dummyMediaContentEntityBuilder()
                         .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                                 .tags(new HashSet<>(Set.of("a", "b"))).build())
                         .build());
-        UUID newChapterId = UUID.randomUUID();
+        final UUID newChapterId = UUID.randomUUID();
 
-        String query = """
+        final String query = """
                 mutation($contentId: UUID!, $chapterId: UUID!) {
                     mutateContent(contentId: $contentId){
                         updateMediaContent(input: {
@@ -141,7 +141,7 @@ class MutationUpdateMediaContentTest {
                 }
                 """;
 
-        MediaContent updatedMediaContent = graphQlTester.document(query)
+        final MediaContent updatedMediaContent = graphQlTester.document(query)
                 .variable("contentId", contentEntity.getId())
                 .variable("chapterId", newChapterId)
                 .execute()
@@ -149,10 +149,10 @@ class MutationUpdateMediaContentTest {
 
         assertThat(updatedMediaContent.getMetadata().getTagNames(), containsInAnyOrder("b", "c"));
 
-        ContentEntity newContentEntity = contentRepository.findById(updatedMediaContent.getId()).orElseThrow();
+        final ContentEntity newContentEntity = contentRepository.findById(updatedMediaContent.getId()).orElseThrow();
         assertThat(newContentEntity, is(instanceOf(MediaContentEntity.class)));
 
-        MediaContentEntity mediaContentEntity = (MediaContentEntity) newContentEntity;
+        final MediaContentEntity mediaContentEntity = (MediaContentEntity) newContentEntity;
 
         // check that tags are updated correctly
         assertThat(mediaContentEntity.getMetadata().getTags(), containsInAnyOrder("b", "c"));

@@ -27,9 +27,9 @@ class MutationChangeStageOrderTest {
     StageRepository stageRepository;
 
     @Test
-    void testUpdateStageOrder(GraphQlTester tester){
+    void testUpdateStageOrder(final GraphQlTester tester){
         // set up database content and input
-        List<UUID> newStageOrderList = new ArrayList<>();
+        final List<UUID> newStageOrderList = new ArrayList<>();
 
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Section test")
@@ -39,7 +39,7 @@ class MutationChangeStageOrderTest {
 
         sectionEntity = sectionRepository.save(sectionEntity);
 
-        Set<StageEntity> stageEntitySet = Set.of(
+        final Set<StageEntity> stageEntitySet = Set.of(
                 buildStageEntity(sectionEntity.getId(), 0),
                 buildStageEntity(sectionEntity.getId(), 1),
                 buildStageEntity(sectionEntity.getId(), 2)
@@ -52,7 +52,7 @@ class MutationChangeStageOrderTest {
 
         // reorder by putting the last element at the beginning and shifting each following element by one index
         for (int i = 0; i < 3; i++) {
-            for (StageEntity stageEntity: sectionEntity.getStages()) {
+            for (final StageEntity stageEntity: sectionEntity.getStages()) {
                 if (stageEntity.getPosition() % 3 == i){
                     newStageOrderList.add(stageEntity.getId());
                 }
@@ -60,7 +60,7 @@ class MutationChangeStageOrderTest {
 
         }
 
-        String query = """
+        final String query = """
                 mutation($id: UUID!, $stageList: [UUID!]!){
                     mutateSection(sectionId: $id){
                         updateStageOrder(stages: $stageList){
@@ -87,14 +87,14 @@ class MutationChangeStageOrderTest {
                 .variable("stageList", newStageOrderList)
                 .execute().path("mutateSection.updateStageOrder").entity(Section.class).satisfies(section -> {
                             assertEquals(3, section.getStages().size());
-                            for (Stage stage : section.getStages()) {
+                            for (final Stage stage : section.getStages()) {
                                 assertEquals(newStageOrderList.indexOf(stage.getId()), stage.getPosition());
                             }
                         }
                 );
     }
 
-    private StageEntity buildStageEntity (UUID sectionId, int pos){
+    private StageEntity buildStageEntity (final UUID sectionId, final int pos){
         return StageEntity.builder()
                 .id(UUID.randomUUID())
                 .sectionId(sectionId)

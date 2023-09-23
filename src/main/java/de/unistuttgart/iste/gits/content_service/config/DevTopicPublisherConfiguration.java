@@ -23,7 +23,7 @@ public class DevTopicPublisherConfiguration {
         }
 
         @Override
-        protected void publishEvent(Object dto, String topic) {
+        protected void publishEvent(final Object dto, final String topic) {
             log.info("Would have published message to topic {}: {}", topic, dto);
         }
     }

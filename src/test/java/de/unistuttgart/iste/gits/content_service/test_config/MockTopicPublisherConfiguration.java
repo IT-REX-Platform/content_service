@@ -20,7 +20,7 @@ public class MockTopicPublisherConfiguration {
     @Primary
     @Bean
     public TopicPublisher getTestTopicPublisher() {
-        TopicPublisher mockPublisher = Mockito.mock(TopicPublisher.class);
+        final TopicPublisher mockPublisher = Mockito.mock(TopicPublisher.class);
         doNothing().when(mockPublisher).notifyChange(any(ContentEntity.class), any());
         doNothing().when(mockPublisher).forwardChange(any(UUID.class), any(), any(CrudOperation.class));
         doNothing().when(mockPublisher).informContentDependentServices(any(), any(CrudOperation.class));

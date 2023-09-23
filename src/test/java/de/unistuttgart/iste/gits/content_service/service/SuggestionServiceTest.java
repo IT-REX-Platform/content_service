@@ -22,10 +22,10 @@ class SuggestionServiceTest {
     @Test
     void testCreateSuggestionsNoSections() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        final List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID());
         doReturn(List.of()).when(sectionService).getSectionsByChapterIds(chapterIds);
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, UUID.randomUUID(), 5, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, UUID.randomUUID(), 5, List.of());
         // Assert
         assertThat(actual, is(empty()));
         // Verify
@@ -36,17 +36,17 @@ class SuggestionServiceTest {
     @Test
     void testCreateSuggestionsNoStages() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of())
                 .build();
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 5, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 5, List.of());
 
         // Assert
         assertThat(actual, is(empty()));
@@ -58,10 +58,10 @@ class SuggestionServiceTest {
     @Test
     void testCreateSuggestionsSortByDueDate() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -78,12 +78,12 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData userProgressData = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData userProgressData = UserProgressData.builder().setIsLearned(false).build();
 
         doReturn(userProgressData).when(userProgressDataService).getUserProgressData(any(), any());
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of());
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("minus5"));
@@ -107,10 +107,10 @@ class SuggestionServiceTest {
     @Test
     void testCreateSuggestionsSortByNextLearnDate() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -126,31 +126,31 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataMinus5 = UserProgressData.builder()
+        final UserProgressData progressDataMinus5 = UserProgressData.builder()
                 .setIsLearned(true)
                 .setIsDueForReview(true)
                 .setNextLearnDate(now().minusDays(5))
                 .build();
-        UserProgressData progressDataMinus2 = UserProgressData.builder()
+        final UserProgressData progressDataMinus2 = UserProgressData.builder()
                 .setIsLearned(true)
                 .setIsDueForReview(true)
                 .setNextLearnDate(now().minusDays(2))
                 .build();
-        UserProgressData progressDataMinus1 = UserProgressData.builder()
+        final UserProgressData progressDataMinus1 = UserProgressData.builder()
                 .setIsLearned(true)
                 .setIsDueForReview(true)
                 .setNextLearnDate(now().minusDays(1))
                 .build();
-        UserProgressData progressDataPlus2 = UserProgressData.builder()
+        final UserProgressData progressDataPlus2 = UserProgressData.builder()
                 .setIsLearned(true)
                 .setIsDueForReview(true)
                 .setNextLearnDate(now().plusDays(2)).
                 build();
 
-        UUID contentIdMinus5 = section.getStages().get(0).getRequiredContents().get(0).getId();
-        UUID contentIdMinus2 = section.getStages().get(0).getRequiredContents().get(1).getId();
-        UUID contentIdMinus1 = section.getStages().get(0).getRequiredContents().get(2).getId();
-        UUID contentIdPlus2 = section.getStages().get(0).getRequiredContents().get(3).getId();
+        final UUID contentIdMinus5 = section.getStages().get(0).getRequiredContents().get(0).getId();
+        final UUID contentIdMinus2 = section.getStages().get(0).getRequiredContents().get(1).getId();
+        final UUID contentIdMinus1 = section.getStages().get(0).getRequiredContents().get(2).getId();
+        final UUID contentIdPlus2 = section.getStages().get(0).getRequiredContents().get(3).getId();
 
         doReturn(progressDataMinus5).when(userProgressDataService).getUserProgressData(userId, contentIdMinus5);
         doReturn(progressDataMinus2).when(userProgressDataService).getUserProgressData(userId, contentIdMinus2);
@@ -158,7 +158,7 @@ class SuggestionServiceTest {
         doReturn(progressDataPlus2).when(userProgressDataService).getUserProgressData(userId, contentIdPlus2);
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
 
         // Assert
         assertThat(actual, hasSize(2));
@@ -182,10 +182,10 @@ class SuggestionServiceTest {
     @Test
     void testContentNotDueForRepetitionIsNotConsidered() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -199,7 +199,7 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressNotDueForRepetition = UserProgressData.builder()
+        final UserProgressData progressNotDueForRepetition = UserProgressData.builder()
                 .setIsLearned(true)
                 .setIsDueForReview(false)
                 .setNextLearnDate(now().plusDays(1))
@@ -208,7 +208,7 @@ class SuggestionServiceTest {
         doReturn(progressNotDueForRepetition).when(userProgressDataService).getUserProgressData(any(), any());
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
 
         // Assert
         assertThat(actual, is(empty()));
@@ -225,10 +225,10 @@ class SuggestionServiceTest {
     @Test
     void testOptionalContentLast() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -244,12 +244,12 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData userProgressData = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData userProgressData = UserProgressData.builder().setIsLearned(false).build();
 
         doReturn(userProgressData).when(userProgressDataService).getUserProgressData(any(), any());
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of());
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("plus1"));
@@ -270,10 +270,10 @@ class SuggestionServiceTest {
     @Test
     void testNewContentsPreferred() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -287,17 +287,17 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataNew = UserProgressData.builder().setIsLearned(false).setNextLearnDate(now().minusDays(5)).build();
-        UserProgressData progressDataRepetition = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(10)).build();
+        final UserProgressData progressDataNew = UserProgressData.builder().setIsLearned(false).setNextLearnDate(now().minusDays(5)).build();
+        final UserProgressData progressDataRepetition = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(10)).build();
 
-        UUID contentIdNew = section.getStages().get(0).getRequiredContents().get(0).getId();
-        UUID contentIdRepetition = section.getStages().get(0).getRequiredContents().get(1).getId();
+        final UUID contentIdNew = section.getStages().get(0).getRequiredContents().get(0).getId();
+        final UUID contentIdRepetition = section.getStages().get(0).getRequiredContents().get(1).getId();
 
         doReturn(progressDataNew).when(userProgressDataService).getUserProgressData(userId, contentIdNew);
         doReturn(progressDataRepetition).when(userProgressDataService).getUserProgressData(userId, contentIdRepetition);
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 1, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 1, List.of());
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("new"));
@@ -318,10 +318,10 @@ class SuggestionServiceTest {
     @Test
     void testContentsWithMoreRewardPointsArePreferred() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -335,17 +335,17 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataMorePoints = UserProgressData.builder().setIsLearned(false).build();
-        UserProgressData progressDataLessPoints = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData progressDataMorePoints = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData progressDataLessPoints = UserProgressData.builder().setIsLearned(false).build();
 
-        UUID contentIdMorePoints = section.getStages().get(0).getRequiredContents().get(0).getId();
-        UUID contentIdLessPoints = section.getStages().get(0).getRequiredContents().get(1).getId();
+        final UUID contentIdMorePoints = section.getStages().get(0).getRequiredContents().get(0).getId();
+        final UUID contentIdLessPoints = section.getStages().get(0).getRequiredContents().get(1).getId();
 
         doReturn(progressDataMorePoints).when(userProgressDataService).getUserProgressData(userId, contentIdMorePoints);
         doReturn(progressDataLessPoints).when(userProgressDataService).getUserProgressData(userId, contentIdLessPoints);
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 1, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 1, List.of());
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("morePoints"));
@@ -366,10 +366,10 @@ class SuggestionServiceTest {
     @Test
     void testSkillLevelFilter() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -384,12 +384,12 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataAll = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData progressDataAll = UserProgressData.builder().setIsLearned(false).build();
 
         doReturn(progressDataAll).when(userProgressDataService).getUserProgressData(eq(userId), any());
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of(SkillType.APPLY));
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 3, List.of(SkillType.APPLY));
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("skill2"));
@@ -408,10 +408,10 @@ class SuggestionServiceTest {
     @Test
     void testOnlyUnlockedContentsAreConsidered() {
         // Arrange
-        List<UUID> chapterIds = List.of(UUID.randomUUID());
-        UUID userId = UUID.randomUUID();
+        final List<UUID> chapterIds = List.of(UUID.randomUUID());
+        final UUID userId = UUID.randomUUID();
 
-        Section section = Section.builder()
+        final Section section = Section.builder()
                 .setChapterId(chapterIds.get(0))
                 .setStages(List.of(
                         Stage.builder()
@@ -439,13 +439,13 @@ class SuggestionServiceTest {
 
         doReturn(List.of(List.of(section))).when(sectionService).getSectionsByChapterIds(chapterIds);
 
-        UserProgressData progressDataLearned = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(1)).build();
-        UserProgressData progressDataNotLearned = UserProgressData.builder().setIsLearned(false).build();
+        final UserProgressData progressDataLearned = UserProgressData.builder().setIsLearned(true).setNextLearnDate(now().minusDays(1)).build();
+        final UserProgressData progressDataNotLearned = UserProgressData.builder().setIsLearned(false).build();
 
-        UUID contentIdUnlocked1 = section.getStages().get(0).getRequiredContents().get(0).getId();
-        UUID contentIdUnlocked2 = section.getStages().get(0).getRequiredContents().get(1).getId();
-        UUID contentIdUnlocked3 = section.getStages().get(1).getRequiredContents().get(0).getId();
-        UUID contentIdUnlocked4 = section.getStages().get(1).getRequiredContents().get(1).getId();
+        final UUID contentIdUnlocked1 = section.getStages().get(0).getRequiredContents().get(0).getId();
+        final UUID contentIdUnlocked2 = section.getStages().get(0).getRequiredContents().get(1).getId();
+        final UUID contentIdUnlocked3 = section.getStages().get(1).getRequiredContents().get(0).getId();
+        final UUID contentIdUnlocked4 = section.getStages().get(1).getRequiredContents().get(1).getId();
 
         doReturn(progressDataLearned).when(userProgressDataService).getUserProgressData(userId, contentIdUnlocked1);
         doReturn(progressDataLearned).when(userProgressDataService).getUserProgressData(userId, contentIdUnlocked2);
@@ -453,7 +453,7 @@ class SuggestionServiceTest {
         doReturn(progressDataNotLearned).when(userProgressDataService).getUserProgressData(userId, contentIdUnlocked4);
 
         // Act
-        List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
+        final List<Suggestion> actual = suggestionService.createSuggestions(chapterIds, userId, 2, List.of());
 
         // Assert
         assertThat(actual.get(0).getContent().getMetadata().getName(), is("unlocked4"));
@@ -468,14 +468,14 @@ class SuggestionServiceTest {
         verify(sectionService).getSectionsByChapterIds(chapterIds);
     }
 
-    private Content contentWithSuggestedDate(OffsetDateTime suggestedDate, String name) {
+    private Content contentWithSuggestedDate(final OffsetDateTime suggestedDate, final String name) {
         return contentWithMetadata(ContentMetadata.builder()
                 .setSuggestedDate(suggestedDate)
                 .setName(name)
                 .build());
     }
 
-    private Assessment assessmentWithSuggestedDateAndSkillType(OffsetDateTime suggestedDate, String name, List<SkillType> skillTypes) {
+    private Assessment assessmentWithSuggestedDateAndSkillType(final OffsetDateTime suggestedDate, final String name, final List<SkillType> skillTypes) {
         return FlashcardSetAssessment.builder()
                 .setMetadata(ContentMetadata.builder()
                         .setSuggestedDate(suggestedDate)
@@ -487,7 +487,7 @@ class SuggestionServiceTest {
                 .build();
     }
 
-    private Content contentWithSuggestedDateAndRewardPoints(OffsetDateTime suggestedDate, String name, int rewardPoints) {
+    private Content contentWithSuggestedDateAndRewardPoints(final OffsetDateTime suggestedDate, final String name, final int rewardPoints) {
         return contentWithMetadata(ContentMetadata.builder()
                 .setSuggestedDate(suggestedDate)
                 .setName(name)
@@ -495,7 +495,7 @@ class SuggestionServiceTest {
                 .build());
     }
 
-    private Content contentWithMetadata(ContentMetadata metadata) {
+    private Content contentWithMetadata(final ContentMetadata metadata) {
         return MediaContent.builder()
                 .setId(UUID.randomUUID())
                 .setMetadata(metadata)

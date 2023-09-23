@@ -14,7 +14,7 @@ public class SectionMapper {
 
     private final StageMapper stageMapper;
 
-    public Section entityToDto(SectionEntity entity) {
+    public Section entityToDto(final SectionEntity entity) {
 
         return Section.builder()
                 .setId(entity.getId())

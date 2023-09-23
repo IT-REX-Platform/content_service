@@ -28,11 +28,11 @@ class QueryContentsWithUserDataTest {
     private UserProgressDataRepository userProgressDataRepository;
 
     @Test
-    void testQueryWithUserDataForCurrentUser(HttpGraphQlTester graphQlTester) {
+    void testQueryWithUserDataForCurrentUser(final HttpGraphQlTester graphQlTester) {
         // arrange one content object with two user data objects
-        UUID chapterId = UUID.randomUUID();
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
+        final UUID userId1 = UUID.randomUUID();
+        final UUID userId2 = UUID.randomUUID();
         MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                         .chapterId(chapterId)
@@ -40,7 +40,7 @@ class QueryContentsWithUserDataTest {
                 .build();
         contentEntity = contentRepository.save(contentEntity);
 
-        String currentUser = """
+        final String currentUser = """
                 {
                     "id": "%s",
                     "userName": "MyUserName",
@@ -50,7 +50,7 @@ class QueryContentsWithUserDataTest {
                 }
                 """.formatted(userId1.toString());
 
-        UserProgressDataEntity userProgressDataEntity1 = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity1 = UserProgressDataEntity.builder()
                 .userId(userId1)
                 .contentId(contentEntity.getId())
                 .learningInterval(1)
@@ -76,7 +76,7 @@ class QueryContentsWithUserDataTest {
         userProgressDataRepository.save(userProgressDataEntity1);
 
         // create another to check if the query is filtered by user id
-        UserProgressDataEntity userProgressDataEntity2 = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity2 = UserProgressDataEntity.builder()
                 .userId(userId2)
                 .contentId(contentEntity.getId())
                 .learningInterval(2)
@@ -84,7 +84,7 @@ class QueryContentsWithUserDataTest {
                 .build();
         userProgressDataRepository.save(userProgressDataEntity2);
 
-        String query = """ 
+        final String query = """ 
                 query {
                     contents {
                         elements {
@@ -146,11 +146,11 @@ class QueryContentsWithUserDataTest {
     }
 
     @Test
-    void testQueryWithUserDataForOtherUser(HttpGraphQlTester graphQlTester) {
+    void testQueryWithUserDataForOtherUser(final HttpGraphQlTester graphQlTester) {
         // arrange one content object with two user data objects
-        UUID chapterId = UUID.randomUUID();
-        UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
+        final UUID userId1 = UUID.randomUUID();
+        final UUID userId2 = UUID.randomUUID();
         MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                         .chapterId(chapterId)
@@ -158,7 +158,7 @@ class QueryContentsWithUserDataTest {
                 .build();
         contentEntity = contentRepository.save(contentEntity);
 
-        UserProgressDataEntity userProgressDataEntity1 = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity1 = UserProgressDataEntity.builder()
                 .userId(userId1)
                 .contentId(contentEntity.getId())
                 .learningInterval(1)
@@ -184,7 +184,7 @@ class QueryContentsWithUserDataTest {
         userProgressDataRepository.save(userProgressDataEntity1);
 
         // create another to check if the query is filtered by user id
-        UserProgressDataEntity userProgressDataEntity2 = UserProgressDataEntity.builder()
+        final UserProgressDataEntity userProgressDataEntity2 = UserProgressDataEntity.builder()
                 .userId(userId2)
                 .contentId(contentEntity.getId())
                 .learningInterval(2)
@@ -192,7 +192,7 @@ class QueryContentsWithUserDataTest {
                 .build();
         userProgressDataRepository.save(userProgressDataEntity2);
 
-        String query = """ 
+        final String query = """ 
                 query($userId: UUID!) {
                     contents {
                         elements {

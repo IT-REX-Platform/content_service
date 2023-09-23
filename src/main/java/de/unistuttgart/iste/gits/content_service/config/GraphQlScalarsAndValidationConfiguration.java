@@ -17,11 +17,11 @@ public class GraphQlScalarsAndValidationConfiguration {
     @Bean
     public RuntimeWiringConfigurer runtimeWiringConfigurer() {
 
-        ValidationRules validationRules = ValidationRules.newValidationRules()
+        final ValidationRules validationRules = ValidationRules.newValidationRules()
                 .onValidationErrorStrategy(OnValidationErrorStrategy.RETURN_NULL)
                 .build();
 
-        ValidationSchemaWiring schemaWiring = new ValidationSchemaWiring(validationRules);
+        final ValidationSchemaWiring schemaWiring = new ValidationSchemaWiring(validationRules);
 
         return wiringBuilder -> wiringBuilder
                 .directiveWiring(schemaWiring)

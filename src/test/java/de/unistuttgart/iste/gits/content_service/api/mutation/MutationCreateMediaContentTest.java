@@ -50,9 +50,9 @@ class MutationCreateMediaContentTest {
     @Test
     @Transactional
     @Commit
-    void testCreateMediaContent(GraphQlTester graphQlTester) {
-        UUID chapterId = UUID.randomUUID();
-        String query = """
+    void testCreateMediaContent(final GraphQlTester graphQlTester) {
+        final UUID chapterId = UUID.randomUUID();
+        final String query = """
                 mutation($chapterId: UUID!) {
                     createMediaContent(input: {
                         metadata: {
@@ -77,7 +77,7 @@ class MutationCreateMediaContentTest {
                 }
                 """;
 
-        MediaContent createdMediaContent = graphQlTester.document(query)
+        final MediaContent createdMediaContent = graphQlTester.document(query)
                 .variable("chapterId", chapterId)
                 .execute()
                 .path("createMediaContent").entity(MediaContent.class).get();
@@ -92,10 +92,10 @@ class MutationCreateMediaContentTest {
         assertThat(createdMediaContent.getMetadata().getChapterId(), is(chapterId));
         assertThat(createdMediaContent.getMetadata().getRewardPoints(), is(1));
 
-        ContentEntity contentEntity = contentRepository.findById(createdMediaContent.getId()).orElseThrow();
+        final ContentEntity contentEntity = contentRepository.findById(createdMediaContent.getId()).orElseThrow();
         assertThat(contentEntity, is(instanceOf(MediaContentEntity.class)));
 
-        MediaContentEntity mediaContentEntity = (MediaContentEntity) contentEntity;
+        final MediaContentEntity mediaContentEntity = (MediaContentEntity) contentEntity;
 
         // check that mediaContent entity is correct
         assertThat(mediaContentEntity.getMetadata().getName(), is("name"));
@@ -115,8 +115,8 @@ class MutationCreateMediaContentTest {
      * Then a ValidationException is thrown
      */
     @Test
-    void testCreateMediaContentWithFlashcardsType(GraphQlTester graphQlTester) {
-        String query = """
+    void testCreateMediaContentWithFlashcardsType(final GraphQlTester graphQlTester) {
+        final String query = """
                 mutation {
                     createMediaContent(input: {
                         metadata: {

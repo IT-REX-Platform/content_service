@@ -31,8 +31,8 @@ class MutationUpdateStageTest {
     @Test
     @Transactional
     @Commit
-    void testUpdateStage(GraphQlTester tester){
-        List<UUID> contentIds = new ArrayList<>();
+    void testUpdateStage(final GraphQlTester tester){
+        final List<UUID> contentIds = new ArrayList<>();
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
                 .chapterId(UUID.randomUUID())
@@ -55,13 +55,13 @@ class MutationUpdateStageTest {
             contentIds.add(entity.getId());
         }
 
-        UpdateStageInput input = UpdateStageInput.builder()
+        final UpdateStageInput input = UpdateStageInput.builder()
                 .setId(stageEntity.getId())
                 .setRequiredContents(List.of(contentIds.get(0)))
                 .setOptionalContents(List.of(contentIds.get(1)))
                 .build();
 
-        String query = """
+        final String query = """
                 mutation ($id: UUID!, $input: UpdateStageInput!){
                     mutateSection(sectionId: $id){
                         updateStage(input: $input){
@@ -79,7 +79,7 @@ class MutationUpdateStageTest {
                 }
                 """;
 
-        String expectedJson = """
+        final String expectedJson = """
                       {
                       "id": "%s",
                       "position": 0,

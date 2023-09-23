@@ -34,14 +34,14 @@ class MutationRemoveTagFromContentTest {
     @Test
     @Transactional
     @Commit
-    void testRemoveTagFromContent(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
+    void testRemoveTagFromContent(final GraphQlTester graphQlTester) {
+        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                         .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());
 
-        String query = """
+        final String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
                     mutateContent(contentId: $contentId){
                         removeTagFromContent(tagName: $tagName) {
@@ -63,7 +63,7 @@ class MutationRemoveTagFromContentTest {
                 .hasSize(1)
                 .contains("tag2");
 
-        ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
+        final ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(1));
         assertThat(updatedContentEntity.getMetadata().getTags(), containsInAnyOrder("tag2"));
 
@@ -77,14 +77,14 @@ class MutationRemoveTagFromContentTest {
     @Test
     @Transactional
     @Commit
-    void testRemoveNonExistingTagFromContent(GraphQlTester graphQlTester) {
-        ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
+    void testRemoveNonExistingTagFromContent(final GraphQlTester graphQlTester) {
+        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
                 .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
                         .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());
 
-        String query = """
+        final String query = """
                 mutation($contentId: UUID!, $tagName: String!) {
                     mutateContent(contentId: $contentId){
                         removeTagFromContent(tagName: $tagName) {
@@ -106,7 +106,7 @@ class MutationRemoveTagFromContentTest {
                 .hasSize(2)
                 .contains("tag1", "tag2");
 
-        ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
+        final ContentEntity updatedContentEntity = contentRepository.findById(contentEntity.getId()).orElseThrow();
         assertThat(updatedContentEntity.getMetadata().getTags(), hasSize(2));
         assertThat(updatedContentEntity.getMetadata().getTags(), containsInAnyOrder("tag1", "tag2"));
     }
