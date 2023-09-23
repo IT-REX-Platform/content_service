@@ -97,8 +97,9 @@ public class ContentController {
         return contentService.removeTagFromContent(contentMutation.getContentId(), tagName);
     }
 
-    @QueryMapping
-    public List<CompositeProgressInformation> progressByChapterIds(@Argument List<UUID> chapterIds, @ContextValue LoggedInUser currentUser) {
+    @QueryMapping(name = INTERNAL_NOAUTH_PREFIX + "progressByChapterIds")
+    public List<CompositeProgressInformation> internalProgressByChapterIds(@Argument final List<UUID> chapterIds,
+                                                                   @ContextValue final LoggedInUser currentUser) {
         return userProgressDataService.getProgressByChapterIdsForUser(chapterIds, currentUser.getId());
     }
 

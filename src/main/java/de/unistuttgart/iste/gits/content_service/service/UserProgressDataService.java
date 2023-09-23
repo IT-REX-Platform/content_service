@@ -160,27 +160,42 @@ public class UserProgressDataService {
     }
 
     /**
-     * Method that calculated the progress of content for an individual user for each Chapter
+     * Method that calculated the progress of content for an individual user for each Chapter.
+     * The returned list of CompositeProgressInformation is sorted in the same order as the chapterIds list.
      *
      * @param chapterIds list of chapters for which the progress has to be evaluated
      * @param userId     the ID of the user for whom progress is evaluated
      * @return Progress for each chapter, containing a percentage of progress, absolut number of content and completed content
      */
-    public List<CompositeProgressInformation> getProgressByChapterIdsForUser(List<UUID> chapterIds, UUID userId) {
-        List<CompositeProgressInformation> chapterProgressItems = new ArrayList<>();
-        Map<UUID, List<Content>> contentEntitiesByChapterIds = contentService.getContentEntitiesSortedByChapterId(chapterIds);
+    public List<CompositeProgressInformation> getProgressByChapterIdsForUser(final List<UUID> chapterIds, final UUID userId) {
+        final List<List<Content>> contentsByChapterIds = contentService.getContentsByChapterIds(chapterIds);
 
-        for (List<Content> contentList : contentEntitiesByChapterIds.values()) {
-            int numCompletedContent = countNumCompletedContent(userId, contentList);
+        final List<CompositeProgressInformation> chapterProgressItems = new ArrayList<>();
 
-            CompositeProgressInformation compositeProgressInformation = CompositeProgressInformation.builder()
-                    .setProgress((double) numCompletedContent / contentList.size() * 100)
-                    .setCompletedContents(numCompletedContent)
-                    .setTotalContents(contentList.size())
-                    .build();
+        for (final List<Content> contentList : contentsByChapterIds) {
+            final int numCompletedContent = countNumCompletedContent(userId, contentList);
+
+            final CompositeProgressInformation compositeProgressInformation =
+                    createProgressInformation(contentList, numCompletedContent);
+
             chapterProgressItems.add(compositeProgressInformation);
         }
+
         return chapterProgressItems;
+    }
+
+    private static CompositeProgressInformation createProgressInformation(final List<Content> contentList, final int numCompletedContent) {
+        double progress = 100.0;
+
+        if (!contentList.isEmpty()) {
+            progress = (double) numCompletedContent / contentList.size() * 100;
+        }
+
+        return CompositeProgressInformation.builder()
+                .setProgress(progress)
+                .setCompletedContents(numCompletedContent)
+                .setTotalContents(contentList.size())
+                .build();
     }
 
     /**

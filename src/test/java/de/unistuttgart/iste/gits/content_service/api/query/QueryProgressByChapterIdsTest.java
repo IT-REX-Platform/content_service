@@ -14,12 +14,21 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import java.util.List;
 import java.util.UUID;
 
-import static graphql.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GraphQlApiTest
 @TablesToDelete({"content_tags", "user_progress_data_progress_log", "user_progress_data", "content"})
 class QueryProgressByChapterIdsTest {
+
+    private static final String QUERY_USER_PROGRESS_BY_CHAPTER_IDS = """ 
+            query($chapterIds: [UUID!]!) {
+                _internal_noauth_progressByChapterIds(chapterIds: $chapterIds){
+                    progress
+                    completedContents
+                    totalContents
+                }
+            }
+            """;
 
     @Autowired
     private ContentRepository contentRepository;
@@ -30,49 +39,21 @@ class QueryProgressByChapterIdsTest {
 
     /**
      * This Testcase assumes Progress has already been made for all content within a chapter
-     *
-     * @param graphQlTester GraphQL HTTP Tester, which allows for manipulation of the HTTP header we require for User-Information
      */
     @Test
-    void testProgressByChapterId(HttpGraphQlTester graphQlTester) {
-        UUID userId = UUID.randomUUID();
-        UUID chapterId = UUID.randomUUID();
-        MediaContentEntity mediaContentEntity = contentRepository.save(TestData.buildContentEntity(chapterId));
-        MediaContentEntity mediaContentEntity1 = contentRepository.save(TestData.buildContentEntity(chapterId));
+    void testProgressByChapterId(final HttpGraphQlTester graphQlTester) {
+        final UUID userId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
+        final MediaContentEntity mediaContentEntity = contentRepository.save(TestData.buildContentEntity(chapterId));
+        final MediaContentEntity mediaContentEntity1 = contentRepository.save(TestData.buildContentEntity(chapterId));
 
         userProgressDataRepository.save(TestData.buildDummyUserProgressData(true, userId, mediaContentEntity.getId()));
         userProgressDataRepository.save(TestData.buildDummyUserProgressData(false, userId, mediaContentEntity1.getId()));
 
-        String currentUser = """
-                {
-                    "id": "%s",
-                    "userName": "MyUserName",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "courseMemberships": []
-                }
-                """.formatted(userId.toString());
+        final List<CompositeProgressInformation> resultList
+                = executeProgressByChapterIdsQuery(graphQlTester, chapterId, userId);
 
-        String query = """ 
-                query($chapterIds: [UUID!]!) {
-                    progressByChapterIds(chapterIds: $chapterIds){
-                        progress
-                        completedContents
-                        totalContents
-                    }
-                }
-                """;
-        List<CompositeProgressInformation> resultList = graphQlTester.mutate()
-                .header("CurrentUser", currentUser)
-                .build()
-                .document(query)
-                .variable("chapterIds", List.of(chapterId))
-                .execute()
-                .path("progressByChapterIds").entityList(CompositeProgressInformation.class).get();
-
-        assertEquals(1, resultList.size());
-
-        CompositeProgressInformation resultItem = resultList.get(0);
+        final CompositeProgressInformation resultItem = resultList.get(0);
         assertEquals(50.0, resultItem.getProgress());
         assertEquals(1, resultItem.getCompletedContents());
         assertEquals(2, resultItem.getTotalContents());
@@ -80,47 +61,21 @@ class QueryProgressByChapterIdsTest {
 
     /**
      * This Testcase assumes no Progress has already been made for all content within a chapter
-     *
-     * @param graphQlTester GraphQL HTTP Tester, which allows for manipulation of the HTTP header we require for User-Information
      */
     @Test
-    void testProgressByChapterIdWithNoProgress(HttpGraphQlTester graphQlTester) {
-        UUID userId = UUID.randomUUID();
-        UUID chapterId = UUID.randomUUID();
-        MediaContentEntity mediaContentEntity = contentRepository.save(TestData.buildContentEntity(chapterId));
-        MediaContentEntity mediaContentEntity1 = contentRepository.save(TestData.buildContentEntity(chapterId));
+    void testProgressByChapterIdWithNoProgress(final HttpGraphQlTester graphQlTester) {
+        final UUID userId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
+        contentRepository.save(TestData.buildContentEntity(chapterId));
+        contentRepository.save(TestData.buildContentEntity(chapterId));
 
 
-        String currentUser = """
-                {
-                    "id": "%s",
-                    "userName": "MyUserName",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "courseMemberships": []
-                }
-                """.formatted(userId.toString());
-
-        String query = """ 
-                query($chapterIds: [UUID!]!) {
-                    progressByChapterIds(chapterIds: $chapterIds){
-                        progress
-                        completedContents
-                        totalContents
-                    }
-                }
-                """;
-        List<CompositeProgressInformation> resultList = graphQlTester.mutate()
-                .header("CurrentUser", currentUser)
-                .build()
-                .document(query)
-                .variable("chapterIds", List.of(chapterId))
-                .execute()
-                .path("progressByChapterIds").entityList(CompositeProgressInformation.class).get();
+        final List<CompositeProgressInformation> resultList
+                = executeProgressByChapterIdsQuery(graphQlTester, chapterId, userId);
 
         assertEquals(1, resultList.size());
 
-        CompositeProgressInformation resultItem = resultList.get(0);
+        final CompositeProgressInformation resultItem = resultList.get(0);
         assertEquals(0.0, resultItem.getProgress());
         assertEquals(0, resultItem.getCompletedContents());
         assertEquals(2, resultItem.getTotalContents());
@@ -128,15 +83,27 @@ class QueryProgressByChapterIdsTest {
 
     /**
      * This Testcase assumes no content exists for the chapter
-     *
-     * @param graphQlTester GraphQL HTTP Tester, which allows for manipulation of the HTTP header we require for User-Information
      */
     @Test
-    void testProgressByChapterIdWithNoContent(HttpGraphQlTester graphQlTester) {
-        UUID userId = UUID.randomUUID();
-        UUID chapterId = UUID.randomUUID();
+    void testProgressByChapterIdWithNoContent(final HttpGraphQlTester graphQlTester) {
+        final UUID userId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
 
-        String currentUser = """
+        final List<CompositeProgressInformation> resultList
+                = executeProgressByChapterIdsQuery(graphQlTester, chapterId, userId);
+
+        assertEquals(1, resultList.size());
+
+        final CompositeProgressInformation resultItem = resultList.get(0);
+        assertEquals(100.0, resultItem.getProgress());
+        assertEquals(0, resultItem.getCompletedContents());
+        assertEquals(0, resultItem.getTotalContents());
+    }
+
+    private List<CompositeProgressInformation> executeProgressByChapterIdsQuery(final HttpGraphQlTester graphQlTester,
+                                                                                final UUID chapterId,
+                                                                                final UUID userId) {
+        final String currentUser = """
                 {
                     "id": "%s",
                     "userName": "MyUserName",
@@ -146,24 +113,13 @@ class QueryProgressByChapterIdsTest {
                 }
                 """.formatted(userId.toString());
 
-        String query = """ 
-                query($chapterIds: [UUID!]!) {
-                    progressByChapterIds(chapterIds: $chapterIds){
-                        progress
-                        completedContents
-                        totalContents
-                    }
-                }
-                """;
-        List<CompositeProgressInformation> resultList = graphQlTester.mutate()
+        return graphQlTester.mutate()
                 .header("CurrentUser", currentUser)
                 .build()
-                .document(query)
+                .document(QUERY_USER_PROGRESS_BY_CHAPTER_IDS)
                 .variable("chapterIds", List.of(chapterId))
                 .execute()
-                .path("progressByChapterIds").entityList(CompositeProgressInformation.class).get();
-
-        assertTrue(resultList.isEmpty());
-
+                .path("_internal_noauth_progressByChapterIds")
+                .entityList(CompositeProgressInformation.class).get();
     }
 }

@@ -27,7 +27,7 @@ type Query {
     """
     Retrieve progress for multiple chapters
     """
-    progressByChapterIds(chapterIds: [UUID!]!): [CompositeProgressInformation!]!
+    _internal_noauth_progressByChapterIds(chapterIds: [UUID!]!): [CompositeProgressInformation!]!
 
     """
     Generates user specific suggestions for multiple chapters.

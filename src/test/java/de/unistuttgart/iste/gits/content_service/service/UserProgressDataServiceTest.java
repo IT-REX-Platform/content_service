@@ -400,43 +400,48 @@ class UserProgressDataServiceTest {
      */
     @Test
     void getProgressByChapterIdsForUserTest() {
-        UUID chapterId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        final UUID chapterId1 = UUID.randomUUID();
+        final UUID chapterId2 = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        List<UUID> chapterIds = List.of(chapterId);
+        final List<UUID> chapterIds = List.of(chapterId1, chapterId2);
 
         // init content and user progress
-        List<MediaContentEntity> mediaContentEntities = List.of(TestData.buildContentEntity(chapterId),
-                TestData.buildContentEntity(chapterId));
+        final List<MediaContentEntity> mediaContentEntities = List.of(TestData.buildContentEntity(chapterId1),
+                TestData.buildContentEntity(chapterId1));
+
         for (int i = 0; i < mediaContentEntities.size(); i++) {
-            MediaContentEntity mediaContentEntity = mediaContentEntities.get(i);
-            UserProgressDataEntity progressDataEntity = buildDummyUserProgressData(i % 2 == 0, userId, mediaContentEntity.getId());
+            final MediaContentEntity mediaContentEntity = mediaContentEntities.get(i);
+            final boolean success = i % 2 == 0;
+            final UserProgressDataEntity progressDataEntity = buildDummyUserProgressData(success, userId, mediaContentEntity.getId());
             // mock repository calls
             doReturn(Optional.of(progressDataEntity)).when(userProgressDataRepository)
                     .findByUserIdAndContentId(userId, mediaContentEntity.getId());
 
         }
 
-        // create chapter -> content Mapping
-        Map<UUID, List<Content>> map = new HashMap<>();
-        map.put(chapterId, mediaContentEntities.stream().map(mediaContentEntity -> contentMapper.entityToDto(mediaContentEntity)).toList());
+        final List<Content> contentsForChapter1 = mediaContentEntities.stream().map(contentMapper::entityToDto).toList();
+        final List<Content> contentsForChapter2 = List.of();
 
-        //mock service with repository calls
-        doReturn(map).when(contentService).getContentEntitiesSortedByChapterId(chapterIds);
+        // mock service with repository calls
+        when(contentService.getContentsByChapterIds(chapterIds)).thenReturn(List.of(contentsForChapter1, contentsForChapter2));
 
         // run method under test
-        List<CompositeProgressInformation> resultList = userProgressDataService.getProgressByChapterIdsForUser(chapterIds, userId);
-
-        // verify called methods
-        verify(contentService, times(1)).getContentEntitiesSortedByChapterId(chapterIds);
-
+        final List<CompositeProgressInformation> resultList = userProgressDataService.getProgressByChapterIdsForUser(chapterIds, userId);
         // assertions
-        assertEquals(1, resultList.size());
+        assertEquals(2, resultList.size());
 
         assertEquals(50.0, resultList.get(0).getProgress());
         assertEquals(1, resultList.get(0).getCompletedContents());
         assertEquals(2, resultList.get(0).getTotalContents());
 
+        assertEquals(100.0, resultList.get(1).getProgress());
+        assertEquals(0, resultList.get(1).getCompletedContents());
+        assertEquals(0, resultList.get(1).getTotalContents());
+
+        // verify called methods
+        verify(userProgressDataRepository, times(2)).findByUserIdAndContentId(any(), any());
+        verify(contentService, times(1)).getContentsByChapterIds(chapterIds);
     }
 
     /**
