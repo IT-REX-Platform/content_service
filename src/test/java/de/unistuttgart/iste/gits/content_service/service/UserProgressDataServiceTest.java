@@ -322,16 +322,16 @@ class UserProgressDataServiceTest {
      * but rather directly work with data made available by the provided contents in the Stage.
      */
     @Test
-    void getStageProgressWithContentUserdataTests(){
+    void getStageProgressWithContentUserdataTests() {
 
         // init test data
         final UUID userId = UUID.randomUUID();
         final MediaContent mediaContent = buildDummyMediaContent();
         final MediaContent mediaContent2 = buildDummyMediaContent();
 
-        final UserProgressDataEntity userProgressData  =
+        final UserProgressDataEntity userProgressData =
                 buildDummyUserProgressData(true, userId, mediaContent.getId());
-        final UserProgressDataEntity userProgressData2  =
+        final UserProgressDataEntity userProgressData2 =
                 buildDummyUserProgressData(false, userId, mediaContent2.getId());
 
         final Stage stage = Stage.builder()
@@ -362,7 +362,7 @@ class UserProgressDataServiceTest {
      * Expected behaviour therefor contains the retrieval of all progress data for contents within the Stage.
      */
     @Test
-    void getStageProgressWithDbQueryTests(){
+    void getStageProgressWithDbQueryTests() {
 
         // init test data
         final UUID userId = UUID.randomUUID();
