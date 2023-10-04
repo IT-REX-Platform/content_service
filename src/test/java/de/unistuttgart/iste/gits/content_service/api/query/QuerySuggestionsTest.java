@@ -40,18 +40,7 @@ class QuerySuggestionsTest {
      */
     @Test
     void testSuggestions(final HttpGraphQlTester graphQlTester) {
-        final UUID userId = UUID.randomUUID();
         final UUID chapterId = UUID.randomUUID();
-
-        final String currentUser = """
-                {
-                    "id": "%s",
-                    "userName": "MyUserName",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "courseMemberships": []
-                }
-                """.formatted(userId.toString());
 
         // Arrange
         final SectionEntity testSection = sectionRepository.save(SectionEntity.builder()
@@ -111,9 +100,6 @@ class QuerySuggestionsTest {
                 """;
 
         graphQlTester
-                .mutate()
-                .header("CurrentUser", currentUser)
-                .build()
                 .document(query)
                 .variable("chapterIds", Set.of(chapterId))
                 .execute()
