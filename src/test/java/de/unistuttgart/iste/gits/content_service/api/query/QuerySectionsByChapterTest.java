@@ -1,14 +1,12 @@
 package de.unistuttgart.iste.gits.content_service.api.query;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.SectionMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
-import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
+import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
 import de.unistuttgart.iste.gits.generated.dto.Section;
 import de.unistuttgart.iste.gits.generated.dto.Stage;
 import org.junit.jupiter.api.Test;
@@ -19,11 +17,9 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GraphQlApiTest
@@ -47,24 +43,33 @@ class QuerySectionsByChapterTest {
 
     private final UUID chapterId = UUID.randomUUID();
     private final UUID chapterId2 = UUID.randomUUID();
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.STUDENT);
+
+    private final UUID userId = loggedInUser.getId();
 
     private List<SectionEntity> fillDatabaseWithSections() {
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
                 .position(0)
                 .chapterId(chapterId)
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
         SectionEntity sectionEntity2 = SectionEntity.builder()
                 .name("Test Section2")
                 .position(1)
                 .chapterId(chapterId)
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
         SectionEntity sectionEntity3 = SectionEntity.builder()
                 .name("Test Section3")
                 .position(0)
                 .chapterId(chapterId2)
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
 
@@ -99,8 +104,8 @@ class QuerySectionsByChapterTest {
     private List<MediaContentEntity> fillDatabaseWithContent() {
         final List<MediaContentEntity> contentEntities = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder()
-                    .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+            MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder(courseId)
+                    .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                             .chapterId(chapterId)
                             .build())
                     .build();
@@ -197,9 +202,10 @@ class QuerySectionsByChapterTest {
 
         final String query = """
                 query($chapterIds: [UUID!]!) {
-                    sectionsByChapterIds(chapterIds: $chapterIds) {
+                    _internal_noauth_sectionsByChapterIds(chapterIds: $chapterIds) {
                         id
                         chapterId
+                        courseId
                         name
                         stages {
                             id
@@ -221,7 +227,7 @@ class QuerySectionsByChapterTest {
         final List<List<Section>> result = tester.document(query)
                 .variable("chapterIds", List.of(chapterId, chapterId2))
                 .execute()
-                .path("sectionsByChapterIds").entityList(sectionListType).get();
+                .path("_internal_noauth_sectionsByChapterIds").entityList(sectionListType).get();
 
         assertThat(result.get(0)).containsExactlyInAnyOrder(entitiesMapped.get(0), entitiesMapped.get(1));
         assertThat(result.get(1)).containsExactlyInAnyOrder(entitiesMapped.get(2));
@@ -229,11 +235,9 @@ class QuerySectionsByChapterTest {
 
     @Test
     void testQuerySectionsByChapterWithUserData(final HttpGraphQlTester graphQlTester) {
-        final UUID userId = UUID.randomUUID();
-
         //init database Data
-        List<SectionEntity> entities = fillDatabaseWithSections();
-        List<MediaContentEntity> contentEntities = fillDatabaseWithContent();
+        final List<SectionEntity> entities = fillDatabaseWithSections();
+        final List<MediaContentEntity> contentEntities = fillDatabaseWithContent();
         fillDatabaseWithUserProgress(userId, contentEntities);
 
         // link some content to stages
@@ -245,42 +249,30 @@ class QuerySectionsByChapterTest {
         });
         sectionRepository.save(section);
 
-       final String currentUser = """
-                {
-                    "id": "%s",
-                    "userName": "MyUserName",
-                    "firstName": "John",
-                    "lastName": "Doe",
-                    "courseMemberships": []
-                }
-                """.formatted(userId.toString());
-
 
         final String query = """
                 query($chapterIds: [UUID!]!) {
-                   sectionsByChapterIds(chapterIds: $chapterIds) {
+                   _internal_noauth_sectionsByChapterIds(chapterIds: $chapterIds) {
                     id
                     chapterId
                     name
                     stages {
                         id
                         position
-                           requiredContentsProgress
+                        requiredContentsProgress
                         optionalContentsProgress    
                        }
                    }
                 }
                 """;
 
-        graphQlTester.mutate()
-                .header("CurrentUser", currentUser)
-                .build()
+        graphQlTester
                 .document(query)
                 .variable("chapterIds", List.of(chapterId))
                 .execute()
-                .path("sectionsByChapterIds[0]").entityList(Object.class).hasSize(2)
+                .path("_internal_noauth_sectionsByChapterIds[0]").entityList(Object.class).hasSize(2)
 
-                .path("sectionsByChapterIds[0]").entityList(Section.class).containsExactly(
+                .path("_internal_noauth_sectionsByChapterIds[0]").entityList(Section.class).containsExactly(
                         Section.builder()
                                 .setId(entities.get(0).getId())
                                 .setChapterId(chapterId)

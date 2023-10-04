@@ -1,8 +1,4 @@
 type Query {
-    """
-    Retrieves all existing contents.
-    """
-    contents: ContentPayload! @deprecated(reason: "Querying all contents will not be supported in the future. Use contentsByIds instead")
 
     """
     Retrieves all existing contents for a given course.

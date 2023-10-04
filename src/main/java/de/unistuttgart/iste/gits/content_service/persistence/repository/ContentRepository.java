@@ -1,8 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.persistence.repository;
 
+import de.unistuttgart.iste.gits.common.persistence.GitsRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.generated.dto.SkillType;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import java.util.UUID;
  * Repository for {@link ContentEntity}
  */
 @Repository
-public interface ContentRepository extends JpaRepository<ContentEntity, UUID> {
+public interface ContentRepository extends GitsRepository<ContentEntity, UUID> {
 
     @Query("select content from Content content where content.metadata.chapterId in (:chapterIds)")
     List<ContentEntity> findByChapterIdIn(List<UUID> chapterIds);

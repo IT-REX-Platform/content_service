@@ -19,16 +19,12 @@ import java.util.UUID;
 public class ContentController {
 
     public static final String INTERNAL_NOAUTH_PREFIX = "_internal_noauth_";
+    public static final String INTERNAL_PREFIX = "_internal_";
     private static final String CONTENT_MUTATION = "ContentMutation";
 
     private final ContentService contentService;
     private final UserProgressDataService userProgressDataService;
     private final SuggestionService suggestionService;
-
-    @QueryMapping
-    public ContentPayload contents() {
-        return contentService.getAllContents();
-    }
 
     @QueryMapping
     public List<Content> contentsByIds(@Argument final List<UUID> ids,
@@ -64,6 +60,9 @@ public class ContentController {
         return contentService.findContentsById(ids).stream()
                 .map(content -> {
                     try {
+                        if (content == null) {
+                            return null;
+                        }
                         // check if the user has access to the course, otherwise return null
                         UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
                                 LoggedInUser.UserRoleInCourse.STUDENT,
@@ -136,7 +135,7 @@ public class ContentController {
 
     @MutationMapping
     public ContentMutation mutateContent(@Argument final UUID contentId, @ContextValue final LoggedInUser currentUser) {
-        Content content = contentService.getContentsById(List.of(contentId)).get(0);
+        final Content content = contentService.getContentsById(List.of(contentId)).get(0);
 
         // check if the user is admin in the course, otherwise throw an exception
         UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
@@ -147,10 +146,10 @@ public class ContentController {
         return new ContentMutation(contentId, contentId);
     }
 
-    @MutationMapping(name = "_internal_createMediaContent")
-    public MediaContent createMediaContent(@Argument final CreateMediaContentInput input,
-                                           @Argument final UUID courseId,
-                                           @ContextValue final LoggedInUser currentUser) {
+    @MutationMapping(name = INTERNAL_PREFIX + "createMediaContent")
+    public MediaContent internalCreateMediaContent(@Argument final CreateMediaContentInput input,
+                                                   @Argument final UUID courseId,
+                                                   @ContextValue final LoggedInUser currentUser) {
         UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
                 LoggedInUser.UserRoleInCourse.ADMINISTRATOR,
                 courseId);
@@ -158,10 +157,10 @@ public class ContentController {
         return contentService.createMediaContent(input, courseId);
     }
 
-    @MutationMapping(name = "_internal_createAssessment")
-    public Assessment createAssessment(@Argument final CreateAssessmentInput input,
-                                       @Argument final UUID courseId,
-                                       @ContextValue final LoggedInUser currentUser) {
+    @MutationMapping(name = INTERNAL_PREFIX + "createAssessment")
+    public Assessment internalCreateAssessment(@Argument final CreateAssessmentInput input,
+                                               @Argument final UUID courseId,
+                                               @ContextValue final LoggedInUser currentUser) {
         UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
                 LoggedInUser.UserRoleInCourse.ADMINISTRATOR,
                 courseId);
@@ -201,8 +200,8 @@ public class ContentController {
     }
 
 
-    @QueryMapping(name = "_internal_noauth_contentWithNoSectionByChapterIds")
-    public List<List<Content>> contentWithNoSectionByChapterIds(@Argument List<UUID> chapterIds) {
+    @QueryMapping(name = INTERNAL_NOAUTH_PREFIX + "contentWithNoSectionByChapterIds")
+    public List<List<Content>> contentWithNoSectionByChapterIds(@Argument final List<UUID> chapterIds) {
         return contentService.getContentWithNoSection(chapterIds);
     }
 
@@ -219,9 +218,6 @@ public class ContentController {
         public UserProgressData progressDataForUser(final T content, @Argument final UUID userId) {
             return userProgressDataService.getUserProgressData(userId, content.getId());
         }
-    }
-
-    public abstract class AssessmentResolver<T extends Assessment> extends ContentResolver<T> {
     }
 
     @Controller

@@ -1,5 +1,6 @@
 package de.unistuttgart.iste.gits.content_service.persistence.entity;
 
+import de.unistuttgart.iste.gits.common.persistence.IWithId;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -35,7 +36,7 @@ import java.util.UUID;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-public class ContentEntity {
+public class ContentEntity implements IWithId<UUID> {
 
     @Id
     @GeneratedValue

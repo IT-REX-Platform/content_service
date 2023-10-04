@@ -87,6 +87,7 @@ public class UserProgressDataService {
 
         userProgressDataEntity.setLearningInterval(
                 calculateNewLearningInterval(userProgressLogEvent, userProgressDataEntity));
+
         final var logItem = userProgressDataMapper.eventToEmbeddable(userProgressLogEvent);
         logItem.setTimestamp(OffsetDateTime.now());
         userProgressDataEntity.getProgressLog().add(logItem);

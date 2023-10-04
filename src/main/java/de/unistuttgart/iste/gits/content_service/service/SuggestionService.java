@@ -3,11 +3,13 @@ package de.unistuttgart.iste.gits.content_service.service;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,16 +106,32 @@ public class SuggestionService {
 
     /**
      * Filters the given contents by the given skill types and sorts them according to the prioritization described
-     * in {@link SuggestionService#createSuggestions(Stream, Stream, UUID, int, List)}.
+     * in {@link SuggestionService#createSuggestions(List, List, UUID, int, List)}
      */
     private Stream<Content> filterAndSort(final Stream<Content> contents, final UUID userId, final List<SkillType> skillTypes) {
         return contents
                 .filter(content -> isNewOrDueForReview(content, userId))
                 .filter(content -> hasCorrectSkillType(content, skillTypes))
                 // sort by due date for new contents and next learn date for repetitions
-                .sorted(comparing((Content content) -> Duration.between(now(), getRelevantLearnDate(content, userId)).toDays())
-                        .thenComparing(content -> getUserProgressData(userId, content.getId()).getIsLearned())
-                        .thenComparing(content -> content.getMetadata().getRewardPoints(), reverseOrder()));
+                .sorted(byNextLearnDateOrRepetitionDate(userId)
+                        // then sort if content is new or a repetition, with new contents first
+                        .thenComparing(newContentFirst(userId))
+                        // then sort by reward points, with more reward points first
+                        .thenComparing(byRewardPoints(), reverseOrder()));
+    }
+
+    @NotNull
+    private static Function<Content, Integer> byRewardPoints() {
+        return content -> content.getMetadata().getRewardPoints();
+    }
+
+    @NotNull
+    private Function<Content, Boolean> newContentFirst(final UUID userId) {
+        return content -> getUserProgressData(userId, content.getId()).getIsLearned();
+    }
+
+    private Comparator<Content> byNextLearnDateOrRepetitionDate(final UUID userId) {
+        return comparing((Content content) -> Duration.between(now(), getRelevantLearnDate(content, userId)).toDays());
     }
 
     /**

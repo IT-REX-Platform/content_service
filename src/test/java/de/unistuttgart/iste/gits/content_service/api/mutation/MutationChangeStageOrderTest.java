@@ -1,7 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.StageEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
@@ -14,6 +15,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.*;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GraphQlApiTest
@@ -26,14 +28,20 @@ class MutationChangeStageOrderTest {
     @Autowired
     StageRepository stageRepository;
 
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
+
     @Test
-    void testUpdateStageOrder(final GraphQlTester tester){
+    void testUpdateStageOrder(final GraphQlTester tester) {
         // set up database content and input
         final List<UUID> newStageOrderList = new ArrayList<>();
 
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Section test")
                 .chapterId(UUID.randomUUID())
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
 
@@ -52,17 +60,30 @@ class MutationChangeStageOrderTest {
 
         // reorder by putting the last element at the beginning and shifting each following element by one index
         for (int i = 0; i < 3; i++) {
-            for (final StageEntity stageEntity: sectionEntity.getStages()) {
-                if (stageEntity.getPosition() % 3 == i){
+            for (final StageEntity stageEntity : sectionEntity.getStages()) {
+                if (stageEntity.getPosition() % 3 == i) {
                     newStageOrderList.add(stageEntity.getId());
                 }
             }
 
         }
 
+        executeUpdateStageOrderMutation(tester, sectionEntity.getId(), newStageOrderList)
+                .path("mutateSection.updateStageOrder").entity(Section.class).satisfies(section -> {
+                            assertEquals(3, section.getStages().size());
+                            for (final Stage stage : section.getStages()) {
+                                assertEquals(newStageOrderList.indexOf(stage.getId()), stage.getPosition());
+                            }
+                        }
+                );
+    }
+
+    private GraphQlTester.Response executeUpdateStageOrderMutation(final GraphQlTester graphQlTester,
+                                                                   final UUID sectionId,
+                                                                   final List<UUID> stageList) {
         final String query = """
-                mutation($id: UUID!, $stageList: [UUID!]!){
-                    mutateSection(sectionId: $id){
+                mutation($sectionId: UUID!, $stageList: [UUID!]!){
+                    mutateSection(sectionId: $sectionId){
                         updateStageOrder(stages: $stageList){
                             id
                             chapterId
@@ -82,19 +103,14 @@ class MutationChangeStageOrderTest {
                     
                 }
                 """;
-        tester.document(query)
-                .variable("id", sectionEntity.getId())
-                .variable("stageList", newStageOrderList)
-                .execute().path("mutateSection.updateStageOrder").entity(Section.class).satisfies(section -> {
-                            assertEquals(3, section.getStages().size());
-                            for (final Stage stage : section.getStages()) {
-                                assertEquals(newStageOrderList.indexOf(stage.getId()), stage.getPosition());
-                            }
-                        }
-                );
+
+        return graphQlTester.document(query)
+                .variable("sectionId", sectionId)
+                .variable("stageList", stageList)
+                .execute();
     }
 
-    private StageEntity buildStageEntity (final UUID sectionId, final int pos){
+    private StageEntity buildStageEntity(final UUID sectionId, final int pos) {
         return StageEntity.builder()
                 .id(UUID.randomUUID())
                 .sectionId(sectionId)

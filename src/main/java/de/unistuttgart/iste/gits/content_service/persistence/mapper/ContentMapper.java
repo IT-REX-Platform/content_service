@@ -1,17 +1,13 @@
 package de.unistuttgart.iste.gits.content_service.persistence.mapper;
 
-import de.unistuttgart.iste.gits.content_service.persistence.entity.AssessmentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +17,9 @@ public class ContentMapper {
     private final ModelMapper modelMapper;
 
     public Content entityToDto(final ContentEntity contentEntity) {
+        if (contentEntity == null) {
+            return null;
+        }
         final Content result;
         if (contentEntity.getMetadata().getType() == ContentType.MEDIA) {
             result = mediaContentEntityToDto(contentEntity);

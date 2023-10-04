@@ -1,11 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.api.query;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentMetadataEmbeddable;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.SectionEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.StageEntity;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.StageRepository;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
@@ -16,6 +13,8 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
+
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 
 /**
  * Basic test for the suggestions query, detailed tests are in the SuggestionsServiceTest.
@@ -29,6 +28,11 @@ class QuerySuggestionsTest {
     @Autowired
     private StageRepository stageRepository;
 
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, LoggedInUser.UserRoleInCourse.STUDENT);
+
     /**
      * Given a user with progress
      * When the suggestions query is called
@@ -37,8 +41,7 @@ class QuerySuggestionsTest {
     @Test
     void testSuggestions(final HttpGraphQlTester graphQlTester) {
         final UUID userId = UUID.randomUUID();
-        final UUID courseId = UUID.randomUUID();
-        UUID chapterId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
 
         final String currentUser = """
                 {
@@ -54,10 +57,11 @@ class QuerySuggestionsTest {
         final SectionEntity testSection = sectionRepository.save(SectionEntity.builder()
                 .name("Test Section")
                 .chapterId(chapterId)
+                .courseId(courseId)
                 .stages(Set.of())
                 .build());
 
-        final StageEntity testStage = stageRepository.save(
+        stageRepository.save(
                 StageEntity.builder()
                         .position(1)
                         .sectionId(testSection.getId())

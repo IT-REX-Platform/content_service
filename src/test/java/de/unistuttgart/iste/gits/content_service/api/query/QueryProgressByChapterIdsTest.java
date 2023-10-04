@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.api.query;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
@@ -14,6 +14,7 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import java.util.List;
 import java.util.UUID;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GraphQlApiTest
@@ -35,6 +36,11 @@ class QueryProgressByChapterIdsTest {
 
     @Autowired
     private UserProgressDataRepository userProgressDataRepository;
+
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, LoggedInUser.UserRoleInCourse.STUDENT);
 
 
     /**

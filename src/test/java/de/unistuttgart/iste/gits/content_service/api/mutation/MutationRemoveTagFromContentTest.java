@@ -1,8 +1,9 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
@@ -15,6 +16,7 @@ import org.springframework.test.annotation.Commit;
 import java.util.Set;
 import java.util.UUID;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -26,6 +28,11 @@ class MutationRemoveTagFromContentTest {
     @Autowired
     private ContentRepository contentRepository;
 
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
+
     /**
      * Given a content with tags
      * When the removeTagFromContent mutation is called
@@ -35,8 +42,8 @@ class MutationRemoveTagFromContentTest {
     @Transactional
     @Commit
     void testRemoveTagFromContent(final GraphQlTester graphQlTester) {
-        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
-                .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId)
+                .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                         .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());
@@ -78,8 +85,8 @@ class MutationRemoveTagFromContentTest {
     @Transactional
     @Commit
     void testRemoveNonExistingTagFromContent(final GraphQlTester graphQlTester) {
-        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder()
-                .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+        final ContentEntity contentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId)
+                .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                         .tags(Set.of("tag1", "tag2"))
                         .build())
                 .build());

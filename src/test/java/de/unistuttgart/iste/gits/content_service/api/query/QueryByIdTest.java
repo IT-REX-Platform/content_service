@@ -1,6 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.api.query;
 
 import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
+import de.unistuttgart.iste.gits.common.testutil.InjectCurrentUserHeader;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
@@ -11,6 +13,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import java.util.List;
 import java.util.UUID;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
@@ -21,6 +24,11 @@ class QueryByIdTest {
     @Autowired
     private ContentRepository contentRepository;
 
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, LoggedInUser.UserRoleInCourse.STUDENT);
+
     /**
      * Given valid ids
      * When the contentsByIds query is called
@@ -29,9 +37,9 @@ class QueryByIdTest {
     @Test
     void getByIdOrderIsConsistent(final GraphQlTester graphQlTester) {
         final List<ContentEntity> contentEntities = List.of(
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build()),
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build()),
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build())
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build()),
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build()),
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build())
         );
 
         final List<UUID> ids = contentEntities.stream()
@@ -72,9 +80,9 @@ class QueryByIdTest {
     @Test
     void findByIdOrderIsConsistent(final GraphQlTester graphQlTester) {
         final List<ContentEntity> contentEntities = List.of(
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build()),
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build()),
-                contentRepository.save(TestData.dummyMediaContentEntityBuilder().build())
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build()),
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build()),
+                contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build())
         );
 
         final List<UUID> ids = contentEntities.stream()
@@ -114,7 +122,7 @@ class QueryByIdTest {
      */
     @Test
     void getByNonExistingIds(final GraphQlTester graphQlTester) {
-        final ContentEntity existingContentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder().build());
+        final ContentEntity existingContentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build());
 
         final List<UUID> ids = List.of(
                 existingContentEntity.getId(),
@@ -137,7 +145,6 @@ class QueryByIdTest {
                 .satisfy(errors -> {
                     assertThat(errors, hasSize(1));
                     final String errorMessage = errors.get(0).getMessage();
-                    assertThat(errorMessage, containsStringIgnoringCase("Contents with ids"));
                     assertThat(errorMessage, containsStringIgnoringCase(ids.get(1).toString()));
                     assertThat(errorMessage, containsStringIgnoringCase(ids.get(2).toString()));
                     assertThat(errorMessage, containsStringIgnoringCase("not found"));
@@ -151,7 +158,7 @@ class QueryByIdTest {
      */
     @Test
     void findByNonExistingIds(final GraphQlTester graphQlTester) {
-        final ContentEntity existingContentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder().build());
+        final ContentEntity existingContentEntity = contentRepository.save(TestData.dummyMediaContentEntityBuilder(courseId).build());
 
         final List<UUID> ids = List.of(
                 existingContentEntity.getId(),

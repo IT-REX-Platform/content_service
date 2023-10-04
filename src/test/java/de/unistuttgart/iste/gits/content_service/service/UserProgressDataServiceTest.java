@@ -3,25 +3,18 @@ package de.unistuttgart.iste.gits.content_service.service;
 import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.AssessmentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.ProgressLogItemEmbeddable;
-import de.unistuttgart.iste.gits.content_service.persistence.entity.UserProgressDataEntity;
+import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.UserProgressDataRepository;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 
 import static de.unistuttgart.iste.gits.content_service.TestData.buildDummyUserProgressData;
@@ -123,7 +116,7 @@ class UserProgressDataServiceTest {
     void userDataIsInitializedWhenAbsent() {
         final var contentId = UUID.randomUUID();
         final var userId = UUID.randomUUID();
-        final AssessmentEntity assessmentEntity = TestData.dummyAssessmentEntityBuilder()
+        final AssessmentEntity assessmentEntity = TestData.dummyAssessmentEntityBuilder(UUID.randomUUID())
                 .assessmentMetadata(TestData.dummyAssessmentMetadataEmbeddableBuilder()
                         .initialLearningInterval(2)
                         .build())

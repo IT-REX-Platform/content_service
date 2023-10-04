@@ -1,14 +1,13 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.AssessmentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.generated.dto.ContentType;
-import de.unistuttgart.iste.gits.generated.dto.FlashcardSetAssessment;
-import de.unistuttgart.iste.gits.generated.dto.SkillType;
+import de.unistuttgart.iste.gits.generated.dto.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -28,6 +28,11 @@ class MutationUpdateAssessmentTest {
 
     @Autowired
     private ContentRepository contentRepository;
+
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
 
     /**
      * Given a valid UpdateAssessmentInput
@@ -39,7 +44,7 @@ class MutationUpdateAssessmentTest {
     @Commit
     void testUpdateAssessment(final GraphQlTester graphQlTester) {
         final ContentEntity contentEntity = contentRepository.save(
-                TestData.dummyAssessmentEntityBuilder().build());
+                TestData.dummyAssessmentEntityBuilder(courseId).build());
         final UUID newChapterId = UUID.randomUUID();
 
         final String query = """

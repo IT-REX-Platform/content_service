@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.api.query;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
@@ -18,6 +18,7 @@ import org.springframework.test.annotation.Commit;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @GraphQlApiTest
@@ -38,6 +39,10 @@ class QueryGetContentWithNoSectionTest {
 
     private final UUID chapterId = UUID.randomUUID();
     private final UUID chapterId2 = UUID.randomUUID();
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, LoggedInUser.UserRoleInCourse.STUDENT);
 
     @Test
     @Transactional
@@ -84,8 +89,8 @@ class QueryGetContentWithNoSectionTest {
     private List<MediaContentEntity> fillDatabaseWithContent() {
         final List<MediaContentEntity> contentEntities = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder()
-                    .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+            MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder(courseId)
+                    .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                             .suggestedDate(OffsetDateTime.parse("2020-01-01T00:00:00.000Z"))
                             .chapterId(chapterId)
                             .build())
@@ -93,8 +98,8 @@ class QueryGetContentWithNoSectionTest {
             contentEntity = contentRepository.save(contentEntity);
             contentEntities.add(contentEntity);
         }
-        MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder()
-                .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+        MediaContentEntity contentEntity = TestData.dummyMediaContentEntityBuilder(courseId)
+                .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                         .suggestedDate(OffsetDateTime.parse("2020-01-01T00:00:00.000Z"))
                         .chapterId(chapterId2)
                         .build())
@@ -109,12 +114,14 @@ class QueryGetContentWithNoSectionTest {
     private List<SectionEntity> fillDatabaseWithSections(final List<MediaContentEntity> contentEntities) {
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
+                .courseId(courseId)
                 .chapterId(chapterId)
                 .stages(new HashSet<>())
                 .build();
         SectionEntity sectionEntity2 = SectionEntity.builder()
                 .name("Test Section2")
                 .chapterId(chapterId2)
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
 

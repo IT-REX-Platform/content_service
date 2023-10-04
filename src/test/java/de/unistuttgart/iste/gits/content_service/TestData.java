@@ -6,21 +6,19 @@ import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import de.unistuttgart.iste.gits.generated.dto.SkillType;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class TestData {
 
-    public static MediaContentEntity.MediaContentEntityBuilder<?, ?> dummyMediaContentEntityBuilder() {
+    public static MediaContentEntity.MediaContentEntityBuilder<?, ?> dummyMediaContentEntityBuilder(final UUID courseId) {
         return MediaContentEntity.builder()
-                .metadata(dummyContentMetadataEmbeddableBuilder().build());
+                .metadata(dummyContentMetadataEmbeddableBuilder(courseId).build());
     }
 
-    public static AssessmentEntity.AssessmentEntityBuilder<?, ?> dummyAssessmentEntityBuilder() {
+    public static AssessmentEntity.AssessmentEntityBuilder<?, ?> dummyAssessmentEntityBuilder(final UUID courseId) {
         return AssessmentEntity.builder()
-                .metadata(dummyContentMetadataEmbeddableBuilder()
+                .metadata(dummyContentMetadataEmbeddableBuilder(courseId)
                         .type(ContentType.FLASHCARDS)
                         .build())
                 .assessmentMetadata(dummyAssessmentMetadataEmbeddableBuilder().build());
@@ -33,9 +31,9 @@ public class TestData {
                 .initialLearningInterval(1);
     }
 
-    public static ContentMetadataEmbeddable.ContentMetadataEmbeddableBuilder dummyContentMetadataEmbeddableBuilder() {
+    public static ContentMetadataEmbeddable.ContentMetadataEmbeddableBuilder dummyContentMetadataEmbeddableBuilder(final UUID courseId) {
         return ContentMetadataEmbeddable.builder()
-                .courseId(UUID.randomUUID())
+                .courseId(courseId)
                 .chapterId(UUID.randomUUID())
                 .name("Test Content")
                 .rewardPoints(0)
@@ -75,18 +73,17 @@ public class TestData {
                 .success(success)
                 .timeToComplete(null)
                 .build();
-        final UserProgressDataEntity userProgressData = UserProgressDataEntity.builder()
+        return UserProgressDataEntity.builder()
                 .userId(userId)
                 .contentId(contentId)
                 .progressLog(List.of(logItem))
                 .learningInterval(null)
                 .build();
-        return userProgressData;
     }
 
-    public static AssessmentEntity assessmentEntityWithSkillType(final UUID chapterId, final SkillType... skillTypes) {
-        return dummyAssessmentEntityBuilder()
-                .metadata(dummyContentMetadataEmbeddableBuilder()
+    public static AssessmentEntity assessmentEntityWithSkillType(final UUID courseId, final UUID chapterId, final SkillType... skillTypes) {
+        return dummyAssessmentEntityBuilder(courseId)
+                .metadata(dummyContentMetadataEmbeddableBuilder(courseId)
                         .chapterId(chapterId)
                         .type(ContentType.FLASHCARDS)
                         .build())

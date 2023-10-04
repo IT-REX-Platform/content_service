@@ -482,11 +482,11 @@ class SuggestionServiceTest {
         assertThat(actual, hasSize(2));
 
         // Verify
-        verify(userProgressDataService).getUserProgressData(userId, contentIdUnlocked1);
-        verify(userProgressDataService).getUserProgressData(userId, contentIdUnlocked2);
-        verify(userProgressDataService).getUserProgressData(userId, contentIdUnlocked3);
-        verify(userProgressDataService).getUserProgressData(userId, contentIdUnlocked4);
-        verify(sectionService, times(2)).getSectionsByChapterIds(chapterIds);
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(userId, contentIdUnlocked1);
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(userId, contentIdUnlocked2);
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(userId, contentIdUnlocked3);
+        verify(userProgressDataService, atLeastOnce()).getUserProgressData(userId, contentIdUnlocked4);
+        verify(sectionService, atLeastOnce()).getSectionsByChapterIds(chapterIds);
     }
 
     private Content contentWithSuggestedDate(final OffsetDateTime suggestedDate, final String name) {

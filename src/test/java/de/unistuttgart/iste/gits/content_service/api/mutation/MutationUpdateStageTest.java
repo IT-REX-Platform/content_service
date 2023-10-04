@@ -1,7 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
 import de.unistuttgart.iste.gits.generated.dto.UpdateStageInput;
@@ -13,6 +14,7 @@ import org.springframework.test.annotation.Commit;
 
 import java.util.*;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static de.unistuttgart.iste.gits.content_service.TestData.buildContentEntity;
 
 @GraphQlApiTest
@@ -28,14 +30,21 @@ class MutationUpdateStageTest {
     @Autowired
     private ContentRepository contentRepository;
 
+
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
+
     @Test
     @Transactional
     @Commit
-    void testUpdateStage(final GraphQlTester tester){
+    void testUpdateStage(final GraphQlTester tester) {
         final List<UUID> contentIds = new ArrayList<>();
         SectionEntity sectionEntity = SectionEntity.builder()
                 .name("Test Section")
                 .chapterId(UUID.randomUUID())
+                .courseId(courseId)
                 .stages(new HashSet<>())
                 .build();
         sectionEntity = sectionRepository.save(sectionEntity);

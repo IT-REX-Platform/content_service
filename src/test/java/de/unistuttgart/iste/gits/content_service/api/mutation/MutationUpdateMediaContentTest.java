@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.testutil.GraphQlApiTest;
-import de.unistuttgart.iste.gits.common.testutil.TablesToDelete;
+import de.unistuttgart.iste.gits.common.testutil.*;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
@@ -15,10 +15,10 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.annotation.Commit;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
+import static de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse.ADMINISTRATOR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -28,6 +28,11 @@ class MutationUpdateMediaContentTest {
 
     @Autowired
     private ContentRepository contentRepository;
+
+    private final UUID courseId = UUID.randomUUID();
+
+    @InjectCurrentUserHeader
+    private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, ADMINISTRATOR);
 
     /**
      * Given a valid UpdateMediaContentInput
@@ -39,7 +44,7 @@ class MutationUpdateMediaContentTest {
     @Commit
     void testUpdateMediaContent(final GraphQlTester graphQlTester) {
         final ContentEntity contentEntity = contentRepository.save(
-                TestData.dummyMediaContentEntityBuilder().build());
+                TestData.dummyMediaContentEntityBuilder(courseId).build());
         final UUID newChapterId = UUID.randomUUID();
 
         final String query = """
@@ -110,8 +115,8 @@ class MutationUpdateMediaContentTest {
     @Commit
     void testUpdateContentWithTagsCorrectly(final GraphQlTester graphQlTester) {
         final ContentEntity contentEntity = contentRepository.save(
-                TestData.dummyMediaContentEntityBuilder()
-                        .metadata(TestData.dummyContentMetadataEmbeddableBuilder()
+                TestData.dummyMediaContentEntityBuilder(courseId)
+                        .metadata(TestData.dummyContentMetadataEmbeddableBuilder(courseId)
                                 .tags(new HashSet<>(Set.of("a", "b"))).build())
                         .build());
         final UUID newChapterId = UUID.randomUUID();
