@@ -1,6 +1,6 @@
 package de.unistuttgart.iste.gits.content_service.persistence.mapper;
 
-import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
+import de.unistuttgart.iste.gits.common.event.UserProgressUpdatedEvent;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ProgressLogItemEmbeddable;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.UserProgressDataEntity;
 import de.unistuttgart.iste.gits.generated.dto.UserProgressData;
@@ -32,8 +32,8 @@ public class UserProgressDataMapper {
         return result;
     }
 
-    public ProgressLogItemEmbeddable eventToEmbeddable(final UserProgressLogEvent userProgressLogEvent) {
-        return modelMapper.map(userProgressLogEvent, ProgressLogItemEmbeddable.class);
+    public ProgressLogItemEmbeddable eventToEmbeddable(final UserProgressUpdatedEvent userProgressUpdatedEvent) {
+        return modelMapper.map(userProgressUpdatedEvent, ProgressLogItemEmbeddable.class);
     }
 
     private static Boolean isDueForReview(final Optional<OffsetDateTime> optionalNextLearnDate) {

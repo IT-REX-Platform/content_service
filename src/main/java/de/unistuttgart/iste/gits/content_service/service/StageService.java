@@ -78,7 +78,7 @@ public class StageService {
     private Set<ContentEntity> getAndValidateContentsOfStage(final UUID chapterId, final List<UUID> contentIds) {
         final Set<ContentEntity> resultSet = new HashSet<>();
 
-        final List<ContentEntity> contentEntities = contentRepository.findContentEntitiesByIdIn(contentIds);
+        final List<ContentEntity> contentEntities = contentRepository.findAllById(contentIds);
 
         for (final ContentEntity contentEntity : contentEntities) {
             // only add content that is located in the same chapter as the Work-Path / Stage

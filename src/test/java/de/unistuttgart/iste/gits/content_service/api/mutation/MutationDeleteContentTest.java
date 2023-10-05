@@ -1,14 +1,13 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
+import de.unistuttgart.iste.gits.common.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.testutil.*;
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.TestData;
-import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.*;
-import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 
-@ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
+@ContextConfiguration(classes = MockTestPublisherConfiguration.class)
 @GraphQlApiTest
 @TablesToDelete({"content_tags", "user_progress_data", "section", "stage", "content"})
 class MutationDeleteContentTest {
@@ -41,13 +40,14 @@ class MutationDeleteContentTest {
     private StageRepository stageRepository;
     @Autowired
     private SectionRepository sectionRepository;
-    @Autowired
-    private TopicPublisher topicPublisher;
 
     private final UUID courseId = UUID.randomUUID();
 
     @InjectCurrentUserHeader
     private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
+
+    @Autowired
+    private TopicPublisher topicPublisher;
 
     @BeforeEach
     void beforeEach() {
@@ -83,7 +83,6 @@ class MutationDeleteContentTest {
                 .learningInterval(1)
                 .build();
         userProgressRepository.save(progress2);
-
         final String query = """
                 mutation($id: UUID!) {
                     mutateContent(contentId: $id){
@@ -103,7 +102,7 @@ class MutationDeleteContentTest {
         // test that user progress is deleted
         assertThat(userProgressRepository.count(), is(0L));
 
-        verify(topicPublisher).informContentDependentServices(List.of(contentEntity.getId()), CrudOperation.DELETE);
+        verify(topicPublisher).notifyContentChanges(List.of(contentEntity.getId()), CrudOperation.DELETE);
 
     }
 
@@ -188,7 +187,7 @@ class MutationDeleteContentTest {
                 mutation($id: UUID!) {
                     mutateContent(contentId: $id) {
                         deleteContent
-                    } 
+                    }
                 }
                 """;
 

@@ -106,8 +106,8 @@ class StageServiceTest {
         //mock repository
         when(sectionRepository.findById(sectionEntity.getId())).thenReturn(Optional.of(sectionEntity));
         when(sectionRepository.existsById(any())).thenReturn(true);
-        when(contentRepository.findContentEntitiesByIdIn(stageInput.getRequiredContents())).thenReturn(expectedReqContents);
-        when(contentRepository.findContentEntitiesByIdIn(stageInput.getOptionalContents())).thenReturn(expectedOptContents);
+        when(contentRepository.findAllById(stageInput.getRequiredContents())).thenReturn(expectedReqContents);
+        when(contentRepository.findAllById(stageInput.getOptionalContents())).thenReturn(expectedOptContents);
         when(stageRepository.save(any())).thenReturn(stageEntity);
 
 
@@ -188,8 +188,8 @@ class StageServiceTest {
         //mock database
         when(stageRepository.findById(input.getId())).thenReturn(Optional.of(oldStageEntity));
         when(sectionRepository.findById(oldStageEntity.getSectionId())).thenReturn(Optional.of(sectionEntity));
-        when(contentRepository.findContentEntitiesByIdIn(input.getRequiredContents())).thenReturn(expectedReqContents);
-        when(contentRepository.findContentEntitiesByIdIn(input.getOptionalContents())).thenReturn(expectedOptContents);
+        when(contentRepository.findAllById(input.getRequiredContents())).thenReturn(expectedReqContents);
+        when(contentRepository.findAllById(input.getOptionalContents())).thenReturn(expectedOptContents);
         when(stageRepository.save(any())).thenReturn(oldStageEntity);
 
         //execute method under test
@@ -301,8 +301,8 @@ class StageServiceTest {
         //mock database
         when(stageRepository.findById(input.getId())).thenReturn(Optional.of(oldStageEntity));
         when(sectionRepository.findById(oldStageEntity.getSectionId())).thenReturn(Optional.of(sectionEntity));
-        when(contentRepository.findContentEntitiesByIdIn(input.getRequiredContents())).thenReturn(expectedReqContents);
-        when(contentRepository.findContentEntitiesByIdIn(input.getOptionalContents())).thenReturn(expectedOptContents);
+        when(contentRepository.findAllById(input.getRequiredContents())).thenReturn(expectedReqContents);
+        when(contentRepository.findAllById(input.getOptionalContents())).thenReturn(expectedOptContents);
         when(stageRepository.save(any())).thenReturn(oldStageEntity);
 
         //execute method under test

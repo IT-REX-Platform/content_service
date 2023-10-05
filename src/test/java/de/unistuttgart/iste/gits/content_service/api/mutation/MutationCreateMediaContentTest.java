@@ -1,23 +1,18 @@
 package de.unistuttgart.iste.gits.content_service.api.mutation;
 
-import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.testutil.*;
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
-import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.ContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.MediaContentEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.ContentRepository;
-import de.unistuttgart.iste.gits.content_service.test_config.MockTopicPublisherConfiguration;
 import de.unistuttgart.iste.gits.generated.dto.ContentType;
 import de.unistuttgart.iste.gits.generated.dto.MediaContent;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -25,10 +20,7 @@ import java.util.UUID;
 import static de.unistuttgart.iste.gits.common.testutil.TestUsers.userWithMembershipInCourseWithId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = MockTopicPublisherConfiguration.class)
 @GraphQlApiTest
 @TablesToDelete({"content_tags", "content"})
 class MutationCreateMediaContentTest {
@@ -36,18 +28,10 @@ class MutationCreateMediaContentTest {
     @Autowired
     private ContentRepository contentRepository;
 
-    @Autowired
-    private TopicPublisher topicPublisher;
-
     private final UUID courseId = UUID.randomUUID();
 
     @InjectCurrentUserHeader
     private final LoggedInUser loggedInUser = userWithMembershipInCourseWithId(courseId, UserRoleInCourse.ADMINISTRATOR);
-
-    @BeforeEach
-    void beforeEach() {
-        reset(topicPublisher);
-    }
 
     /**
      * Given a valid CreateAssessmentInput
@@ -113,8 +97,6 @@ class MutationCreateMediaContentTest {
         assertThat(mediaContentEntity.getMetadata().getType(), is(ContentType.MEDIA));
         assertThat(mediaContentEntity.getMetadata().getChapterId(), is(chapterId));
         assertThat(mediaContentEntity.getMetadata().getRewardPoints(), is(1));
-
-        verify(topicPublisher, atLeastOnce()).notifyChange(contentEntity, CrudOperation.CREATE);
     }
 
     /**
@@ -150,6 +132,5 @@ class MutationCreateMediaContentTest {
                 });
 
         assertThat(contentRepository.findAll(), hasSize(0));
-        verify(topicPublisher, never()).notifyChange(any(), any());
     }
 }

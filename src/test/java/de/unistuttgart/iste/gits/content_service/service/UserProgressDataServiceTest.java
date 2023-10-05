@@ -1,8 +1,8 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
-import de.unistuttgart.iste.gits.common.event.UserProgressLogEvent;
+import de.unistuttgart.iste.gits.common.dapr.TopicPublisher;
+import de.unistuttgart.iste.gits.common.event.UserProgressUpdatedEvent;
 import de.unistuttgart.iste.gits.content_service.TestData;
-import de.unistuttgart.iste.gits.content_service.dapr.TopicPublisher;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
@@ -149,7 +149,7 @@ class UserProgressDataServiceTest {
     void logProgress() {
         final var contentId = UUID.randomUUID();
         final var userId = UUID.randomUUID();
-        final UserProgressLogEvent event = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent event = UserProgressUpdatedEvent.builder()
                 .contentId(contentId)
                 .userId(userId)
                 .timeToComplete(100)
@@ -186,7 +186,7 @@ class UserProgressDataServiceTest {
                         .build()
         );
 
-        verify(topicPublisher).forwardContentProgressed(event);
+        verify(topicPublisher).notifyUserProgressUpdated(event);
     }
 
     /**
@@ -196,7 +196,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalSuccess() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(0)
@@ -217,7 +217,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalFailure() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(1.0)
                 .success(false)
                 .hintsUsed(0)
@@ -238,7 +238,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalFailureLowCorrectness() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(0.1)
                 .success(false)
                 .hintsUsed(0)
@@ -259,7 +259,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalSuccessLowCorrectness() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(0.5)
                 .success(true)
                 .hintsUsed(0)
@@ -280,7 +280,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalHintsUsed() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(1)
@@ -301,7 +301,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalManyHintsUsed() {
-        final UserProgressLogEvent userProgressLogEvent = UserProgressLogEvent.builder()
+        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(100)
