@@ -70,14 +70,37 @@
 </thead>
 <tbody>
 <tr>
-<td colspan="2" valign="top"><strong>contents</strong></td>
-<td valign="top"><a href="#contentpayload">ContentPayload</a>!</td>
+<td colspan="2" valign="top"><strong>contentsByCourseIds</strong></td>
+<td valign="top">[[<a href="#content">Content</a>!]!]</td>
 <td>
 
 
-get all contents
+Retrieves all existing contents for a given course.
+🔒 The user must have access to the courses with the given ids to access their contents, otherwise an error is thrown.
 
 </td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">courseIds</td>
+<td valign="top">[<a href="#uuid">UUID</a>!]!</td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><strong>_internal_noauth_contentsByCourseIds</strong></td>
+<td valign="top">[[<a href="#content">Content</a>!]!]</td>
+<td>
+
+
+Retrieves all existing contents for a given course.
+⚠️ This query is only accessible internally in the system and allows the caller to fetch contents without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
+
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">courseIds</td>
+<td valign="top">[<a href="#uuid">UUID</a>!]!</td>
+<td></td>
 </tr>
 <tr>
 <td colspan="2" valign="top"><strong>contentsByIds</strong></td>
@@ -86,6 +109,8 @@ get all contents
 
 
 Get contents by ids. Throws an error if any of the ids are not found.
+🔒 The user must have access to the courses containing the contents with the given ids to access their contents,
+otherwise an error is thrown.
 
 </td>
 </tr>
@@ -101,6 +126,8 @@ Get contents by ids. Throws an error if any of the ids are not found.
 
 
 Get contents by ids. If any of the given ids are not found, the corresponding element in the result list will be null.
+🔒 The user must have access to the courses containing the contents with the given ids, otherwise null is returned
+for the respective contents.
 
 </td>
 </tr>
@@ -115,8 +142,9 @@ Get contents by ids. If any of the given ids are not found, the corresponding el
 <td>
 
 
-get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+Get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
 associated with that chapter
+🔒 The user must have access to the courses containing the chapters with the given ids, otherwise an error is thrown.
 
 </td>
 </tr>
@@ -126,12 +154,32 @@ associated with that chapter
 <td></td>
 </tr>
 <tr>
-<td colspan="2" valign="top"><strong>sectionsByChapterIds</strong></td>
+<td colspan="2" valign="top"><strong>_internal_noauth_contentsByChapterIds</strong></td>
+<td valign="top">[[<a href="#content">Content</a>!]!]!</td>
+<td>
+
+
+Get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+associated with that chapter
+⚠️ This query is only accessible internally in the system and allows the caller to fetch sections without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
+
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">chapterIds</td>
+<td valign="top">[<a href="#uuid">UUID</a>!]!</td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><strong>_internal_noauth_sectionsByChapterIds</strong></td>
 <td valign="top">[[<a href="#section">Section</a>!]!]!</td>
 <td>
 
 
 Retrieves all existing sections for multiple chapters.
+⚠️ This query is only accessible internally in the system and allows the caller to fetch sections without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
 
 </td>
 </tr>
@@ -141,12 +189,14 @@ Retrieves all existing sections for multiple chapters.
 <td></td>
 </tr>
 <tr>
-<td colspan="2" valign="top"><strong>progressByChapterIds</strong></td>
+<td colspan="2" valign="top"><strong>_internal_noauth_progressByChapterIds</strong></td>
 <td valign="top">[<a href="#compositeprogressinformation">CompositeProgressInformation</a>!]!</td>
 <td>
 
 
 Retrieve progress for multiple chapters
+⚠️ This query is only accessible internally in the system and allows the caller to fetch chapter progress without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
 
 </td>
 </tr>
@@ -165,6 +215,8 @@ Retrieve progress for multiple chapters
 
     Only content that the user can access will be considered.
     The contents will be ranked by suggested date, with the most overdue or most urgent content first.
+
+    🔒 The user must have access to the courses containing the chapters with the given ids, otherwise an error is thrown.
 
 </td>
 </tr>
@@ -201,13 +253,32 @@ also containing suggestions for media content (which do not have a skill type).
 </td>
 </tr>
 <tr>
-<td colspan="2" valign="top"><strong>_internal_achievableSkillTypesByChapterIds</strong></td>
+<td colspan="2" valign="top"><strong>_internal_noauth_achievableSkillTypesByChapterIds</strong></td>
 <td valign="top">[[<a href="#skilltype">SkillType</a>!]!]!</td>
 <td>
 
 
 Retrieves all skill types that are achievable for the given chapters.
 Each chapter will have its own list of skill types (batching query).
+⚠️ This query is only accessible internally in the system and allows the caller to fetch without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
+
+</td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">chapterIds</td>
+<td valign="top">[<a href="#uuid">UUID</a>!]!</td>
+<td></td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><strong>_internal_noauth_contentWithNoSectionByChapterIds</strong></td>
+<td valign="top">[[<a href="#content">Content</a>!]!]!</td>
+<td>
+
+
+Retrieves all Content that is currently not part of any section within chapters.
+⚠️ This query is only accessible internally in the system and allows the caller to fetch content without
+any permissions check and should not be called without any validation of the caller's permissions. ⚠️
 
 </td>
 </tr>
@@ -231,14 +302,21 @@ Each chapter will have its own list of skill types (batching query).
 </thead>
 <tbody>
 <tr>
-<td colspan="2" valign="top"><strong>createMediaContent</strong></td>
+<td colspan="2" valign="top"><strong>_internal_createMediaContent</strong></td>
 <td valign="top"><a href="#mediacontent">MediaContent</a>!</td>
 <td>
 
 
 Create new media content
+️⚠️ This mutation is only accessible internally in the system ⚠️
+🔒 The user must have admin access to the course containing the section to perform this action.
 
 </td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">courseId</td>
+<td valign="top"><a href="#uuid">UUID</a>!</td>
+<td></td>
 </tr>
 <tr>
 <td colspan="2" align="right" valign="top">input</td>
@@ -246,14 +324,21 @@ Create new media content
 <td></td>
 </tr>
 <tr>
-<td colspan="2" valign="top"><strong>createAssessment</strong></td>
+<td colspan="2" valign="top"><strong>_internal_createAssessment</strong></td>
 <td valign="top"><a href="#assessment">Assessment</a>!</td>
 <td>
 
 
 Create a new Assessment
+⚠️ This mutation is only accessible internally in the system ⚠️
+🔒 The user must have admin access to the course containing the section to perform this action.
 
 </td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">courseId</td>
+<td valign="top"><a href="#uuid">UUID</a>!</td>
+<td></td>
 </tr>
 <tr>
 <td colspan="2" align="right" valign="top">input</td>
@@ -267,6 +352,7 @@ Create a new Assessment
 
 
 Modify Content
+🔒 The user must have admin access to the course containing the section to perform this action.
 
 </td>
 </tr>
@@ -276,14 +362,21 @@ Modify Content
 <td></td>
 </tr>
 <tr>
-<td colspan="2" valign="top"><strong>createSection</strong></td>
+<td colspan="2" valign="top"><strong>_internal_createSection</strong></td>
 <td valign="top"><a href="#section">Section</a>!</td>
 <td>
 
 
 Create new Section
+⚠️ This mutation is only accessible internally in the system ⚠️
+🔒 The user must have admin access to the course containing the section to perform this action.
 
 </td>
+</tr>
+<tr>
+<td colspan="2" align="right" valign="top">courseId</td>
+<td valign="top"><a href="#uuid">UUID</a>!</td>
+<td></td>
 </tr>
 <tr>
 <td colspan="2" align="right" valign="top">input</td>
@@ -296,7 +389,8 @@ Create new Section
 <td>
 
 
-Modify Sections
+Modify the section with the given id.
+🔒 The user must have admin access to the course containing the section to perform this action.
 
 </td>
 </tr>
@@ -463,6 +557,16 @@ Number of reward points a student receives for completing this content
 
 
 ID of the chapter this content is associated with
+
+</td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><strong>courseId</strong></td>
+<td valign="top"><a href="#uuid">UUID</a>!</td>
+<td>
+
+
+ID of the course this content is associated with
 
 </td>
 </tr>
@@ -972,6 +1076,16 @@ Representation of a Section
 
 
 Unique identifier of the Section Object
+
+</td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><strong>courseId</strong></td>
+<td valign="top"><a href="#uuid">UUID</a>!</td>
+<td>
+
+
+Id of the Course the Section is located in.
 
 </td>
 </tr>
