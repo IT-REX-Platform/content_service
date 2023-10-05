@@ -1,6 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
 import de.unistuttgart.iste.gits.common.dapr.TopicPublisher;
+import de.unistuttgart.iste.gits.common.event.ContentProgressedEvent;
 import de.unistuttgart.iste.gits.common.event.UserProgressUpdatedEvent;
 import de.unistuttgart.iste.gits.content_service.TestData;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
@@ -149,7 +150,14 @@ class UserProgressDataServiceTest {
     void logProgress() {
         final var contentId = UUID.randomUUID();
         final var userId = UUID.randomUUID();
-        final UserProgressUpdatedEvent event = UserProgressUpdatedEvent.builder()
+        final Content content = MediaContent.builder()
+                .setId(contentId)
+                .setMetadata(ContentMetadata.builder()
+                        .setChapterId(UUID.randomUUID())
+                        .setCourseId(UUID.randomUUID())
+                        .build())
+                .build();
+        final ContentProgressedEvent event = ContentProgressedEvent.builder()
                 .contentId(contentId)
                 .userId(userId)
                 .timeToComplete(100)
@@ -165,6 +173,7 @@ class UserProgressDataServiceTest {
                 .contentId(contentId)
                 .build();
 
+        doReturn(List.of(content)).when(contentService).getContentsById(List.of(contentId));
         doReturn(Optional.of(initialProgress)).when(userProgressDataRepository).findByUserIdAndContentId(any(), any());
         doAnswer(returnsFirstArg()).when(userProgressDataRepository).save(any(UserProgressDataEntity.class));
 
@@ -186,7 +195,17 @@ class UserProgressDataServiceTest {
                         .build()
         );
 
-        verify(topicPublisher).notifyUserProgressUpdated(event);
+        final UserProgressUpdatedEvent expectedUserProgressEvent = UserProgressUpdatedEvent.builder()
+                .contentId(contentId)
+                .chapterId(content.getMetadata().getChapterId())
+                .courseId(content.getMetadata().getCourseId())
+                .userId(userId)
+                .timeToComplete(100)
+                .correctness(1.0)
+                .hintsUsed(0)
+                .success(true)
+                .build();
+        verify(topicPublisher).notifyUserProgressUpdated(expectedUserProgressEvent);
     }
 
     /**
@@ -196,7 +215,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalSuccess() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(0)
@@ -217,7 +236,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalFailure() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(1.0)
                 .success(false)
                 .hintsUsed(0)
@@ -238,7 +257,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalFailureLowCorrectness() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(0.1)
                 .success(false)
                 .hintsUsed(0)
@@ -259,7 +278,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalSuccessLowCorrectness() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(0.5)
                 .success(true)
                 .hintsUsed(0)
@@ -280,7 +299,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalHintsUsed() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(1)
@@ -301,7 +320,7 @@ class UserProgressDataServiceTest {
      */
     @Test
     void learningIntervalManyHintsUsed() {
-        final UserProgressUpdatedEvent userProgressLogEvent = UserProgressUpdatedEvent.builder()
+        final ContentProgressedEvent userProgressLogEvent = ContentProgressedEvent.builder()
                 .correctness(1.0)
                 .success(true)
                 .hintsUsed(100)

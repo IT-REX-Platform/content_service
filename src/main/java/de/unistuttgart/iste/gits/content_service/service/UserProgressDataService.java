@@ -1,6 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.service;
 
 import de.unistuttgart.iste.gits.common.dapr.TopicPublisher;
+import de.unistuttgart.iste.gits.common.event.ContentProgressedEvent;
 import de.unistuttgart.iste.gits.common.event.UserProgressUpdatedEvent;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.*;
 import de.unistuttgart.iste.gits.content_service.persistence.mapper.UserProgressDataMapper;
@@ -79,22 +80,37 @@ public class UserProgressDataService {
      * A new progress log item will be added to the progress log.
      * The event will be forwarded to the topic "user-progress-updated".
      *
-     * @param userProgressUpdatedEvent the event to log
+     * @param contentProgressedEvent the event to log
      */
-    public void logUserProgress(final UserProgressUpdatedEvent userProgressUpdatedEvent) {
+    public void logUserProgress(final ContentProgressedEvent contentProgressedEvent) {
         final UserProgressDataEntity userProgressDataEntity = getUserProgressDataEntity(
-                userProgressUpdatedEvent.getUserId(), userProgressUpdatedEvent.getContentId());
+                contentProgressedEvent.getUserId(), contentProgressedEvent.getContentId());
 
         userProgressDataEntity.setLearningInterval(
-                calculateNewLearningInterval(userProgressUpdatedEvent, userProgressDataEntity));
+                calculateNewLearningInterval(contentProgressedEvent, userProgressDataEntity));
 
-        final var logItem = userProgressDataMapper.eventToEmbeddable(userProgressUpdatedEvent);
+        final var logItem = userProgressDataMapper.eventToEmbeddable(contentProgressedEvent);
         logItem.setTimestamp(OffsetDateTime.now());
         userProgressDataEntity.getProgressLog().add(logItem);
 
         userProgressDataRepository.save(userProgressDataEntity);
 
-        topicPublisher.notifyUserProgressUpdated(userProgressUpdatedEvent);
+        final Content content = contentService.getContentsById(List.of(contentProgressedEvent.getContentId())).get(0);
+        topicPublisher.notifyUserProgressUpdated(createUserProgressUpdatedEvent(contentProgressedEvent, content));
+    }
+
+    private UserProgressUpdatedEvent createUserProgressUpdatedEvent(final ContentProgressedEvent event,
+                                                                    final Content content) {
+        return UserProgressUpdatedEvent.builder()
+                .userId(event.getUserId())
+                .contentId(event.getContentId())
+                .chapterId(content.getMetadata().getChapterId())
+                .courseId(content.getMetadata().getCourseId())
+                .success(event.isSuccess())
+                .correctness(event.getCorrectness())
+                .hintsUsed(event.getHintsUsed())
+                .timeToComplete(event.getTimeToComplete())
+                .build();
     }
 
     /**
@@ -114,7 +130,8 @@ public class UserProgressDataService {
      * The learning interval can never be smaller than 1, except when it was never scheduled for
      * repetition to begin with.
      */
-    protected Integer calculateNewLearningInterval(final UserProgressUpdatedEvent userProgressUpdatedEvent, final UserProgressDataEntity userProgressDataEntity) {
+    protected Integer calculateNewLearningInterval(final ContentProgressedEvent userProgressUpdatedEvent,
+                                                   final UserProgressDataEntity userProgressDataEntity) {
         if (userProgressDataEntity.getLearningInterval() == null) {
             return null;
         }

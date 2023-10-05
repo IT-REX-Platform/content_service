@@ -2,7 +2,7 @@ package de.unistuttgart.iste.gits.content_service.controller;
 
 
 import de.unistuttgart.iste.gits.common.event.ChapterChangeEvent;
-import de.unistuttgart.iste.gits.common.event.UserProgressUpdatedEvent;
+import de.unistuttgart.iste.gits.common.event.ContentProgressedEvent;
 import de.unistuttgart.iste.gits.content_service.service.*;
 import io.dapr.Topic;
 import io.dapr.client.domain.CloudEvent;
@@ -28,7 +28,7 @@ public class SubscriptionController {
      */
     @Topic(name = "content-progressed", pubsubName = "gits")
     @PostMapping(path = "/content-progressed-pubsub")
-    public Mono<Void> logUserProgress(@RequestBody final CloudEvent<UserProgressUpdatedEvent> cloudEvent) {
+    public Mono<Void> logUserProgress(@RequestBody final CloudEvent<ContentProgressedEvent> cloudEvent) {
         return Mono.fromRunnable(() -> {
             try {
                 userProgressDataService.logUserProgress(cloudEvent.getData());
