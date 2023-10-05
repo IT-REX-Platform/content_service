@@ -7,6 +7,13 @@ type Query {
     contentsByCourseIds(courseIds: [UUID!]!): [[Content!]!]
 
     """
+    Retrieves all existing contents for a given course.
+    ⚠️ This query is only accessible internally in the system and allows the caller to fetch contents without
+    any permissions check and should not be called without any validation of the caller's permissions. ⚠️
+    """
+    _internal_noauth_contentsByCourseIds(courseIds: [UUID!]!): [[Content!]!]
+
+    """
     Get contents by ids. Throws an error if any of the ids are not found.
     🔒 The user must have access to the courses containing the contents with the given ids to access their contents,
     otherwise an error is thrown.
@@ -26,6 +33,14 @@ type Query {
     🔒 The user must have access to the courses containing the chapters with the given ids, otherwise an error is thrown.
     """
     contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
+
+    """
+    Get contents by chapter ids. Returns a list containing sublists, where each sublist contains all contents
+    associated with that chapter
+    ⚠️ This query is only accessible internally in the system and allows the caller to fetch sections without
+    any permissions check and should not be called without any validation of the caller's permissions. ⚠️
+    """
+    _internal_noauth_contentsByChapterIds(chapterIds: [UUID!]!): [[Content!]!]!
 
     """
     Retrieves all existing sections for multiple chapters.
