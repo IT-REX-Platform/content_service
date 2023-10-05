@@ -32,8 +32,8 @@ public class UserProgressDataMapper {
         return result;
     }
 
-    public ProgressLogItemEmbeddable eventToEmbeddable(final ContentProgressedEvent userProgressUpdatedEvent) {
-        return modelMapper.map(userProgressUpdatedEvent, ProgressLogItemEmbeddable.class);
+    public ProgressLogItemEmbeddable eventToEmbeddable(final ContentProgressedEvent contentProgressedEvent) {
+        return modelMapper.map(contentProgressedEvent, ProgressLogItemEmbeddable.class);
     }
 
     private static Boolean isDueForReview(final Optional<OffsetDateTime> optionalNextLearnDate) {
