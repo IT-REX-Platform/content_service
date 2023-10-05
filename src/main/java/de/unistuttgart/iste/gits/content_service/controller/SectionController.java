@@ -1,7 +1,7 @@
 package de.unistuttgart.iste.gits.content_service.controller;
 
 import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser;
-import de.unistuttgart.iste.gits.common.user_handling.UserCourseAccessValidator;
+import de.unistuttgart.iste.gits.common.user_handling.LoggedInUser.UserRoleInCourse;
 import de.unistuttgart.iste.gits.content_service.service.SectionService;
 import de.unistuttgart.iste.gits.generated.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.UUID;
+
+import static de.unistuttgart.iste.gits.common.user_handling.UserCourseAccessValidator.validateUserHasAccessToCourse;
 
 @Slf4j
 @Controller
@@ -25,9 +27,7 @@ public class SectionController {
         Section section = sectionService.getSectionById(sectionId);
 
         // check if the user is admin in the course, otherwise throw an exception
-        UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
-                LoggedInUser.UserRoleInCourse.ADMINISTRATOR,
-                section.getCourseId());
+        validateUserHasAccessToCourse(currentUser, UserRoleInCourse.ADMINISTRATOR, section.getCourseId());
 
         //parent object for nested mutations
         return new SectionMutation(sectionId, sectionId);
@@ -37,9 +37,7 @@ public class SectionController {
     public Section createSection(@Argument final CreateSectionInput input,
                                  @Argument final UUID courseId,
                                  @ContextValue final LoggedInUser currentUser) {
-        UserCourseAccessValidator.validateUserHasAccessToCourse(currentUser,
-                LoggedInUser.UserRoleInCourse.ADMINISTRATOR,
-                courseId);
+        validateUserHasAccessToCourse(currentUser, UserRoleInCourse.ADMINISTRATOR, courseId);
 
         return sectionService.createSection(courseId, input);
     }
