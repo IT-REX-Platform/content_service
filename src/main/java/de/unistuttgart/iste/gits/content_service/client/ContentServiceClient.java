@@ -39,7 +39,6 @@ public class ContentServiceClient {
      */
     public List<Content> queryContentsOfChapter(final UUID userId, final UUID chapterId) throws ContentServiceConnectionException {
         log.info("Querying contents of chapter with id {}", chapterId);
-        log.info("Query", QueryDefinitions.CONTENTS_BY_CHAPTER_IDS_QUERY);
 
         try {
             return graphQlClient.document(QueryDefinitions.CONTENTS_BY_CHAPTER_IDS_QUERY)

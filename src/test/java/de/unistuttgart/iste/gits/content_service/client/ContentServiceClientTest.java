@@ -71,7 +71,6 @@ class ContentServiceClientTest {
         final UUID chapterId = UUID.randomUUID();
         final UUID userId = UUID.randomUUID();
 
-
         contentRepository.save(createMediaContentForChapter(courseId, chapterId));
         contentRepository.save(createAssessmentForChapter(courseId, chapterId, ContentType.FLASHCARDS));
         contentRepository.save(createAssessmentForChapter(courseId, chapterId, ContentType.QUIZ));
