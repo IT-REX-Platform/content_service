@@ -29,6 +29,8 @@ public class QueryDefinitions {
                     learningInterval
                     nextLearnDate
                     lastLearnDate
+                    isLearned
+                    isDueForReview
                     log {
                         timestamp
                         success
