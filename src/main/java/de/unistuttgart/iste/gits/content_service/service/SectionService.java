@@ -92,7 +92,7 @@ public class SectionService {
             throw new IncompleteEventMessageException(IncompleteEventMessageException.ERROR_INCOMPLETE_MESSAGE);
         }
         sections = sectionRepository.findByChapterIdInOrderByPosition(chapterIds);
-        sectionRepository.deleteAllInBatch(sections);
+        sectionRepository.deleteAll(sections);
     }
 
     /**

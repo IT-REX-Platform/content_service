@@ -50,7 +50,9 @@ public class UserProgressDataService {
     }
 
     /**
-     * Creates a User Progress Entity in the Database with no initial Progress tracked
+     * Creates a User Progress Entity in the Database with no initial Progress tracked.
+     * This method is synchronized to prevent multiple threads from creating the same entity,
+     * which causes a unique constraint violation.
      *
      * @param userId    ID of user
      * @param contentId ID of Content

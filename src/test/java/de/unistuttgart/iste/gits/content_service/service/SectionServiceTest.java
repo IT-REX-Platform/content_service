@@ -5,13 +5,9 @@ import de.unistuttgart.iste.gits.common.event.CrudOperation;
 import de.unistuttgart.iste.gits.common.exception.IncompleteEventMessageException;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.SectionEntity;
 import de.unistuttgart.iste.gits.content_service.persistence.entity.StageEntity;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.ContentMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.SectionMapper;
-import de.unistuttgart.iste.gits.content_service.persistence.mapper.StageMapper;
+import de.unistuttgart.iste.gits.content_service.persistence.mapper.*;
 import de.unistuttgart.iste.gits.content_service.persistence.repository.SectionRepository;
-import de.unistuttgart.iste.gits.generated.dto.CreateSectionInput;
-import de.unistuttgart.iste.gits.generated.dto.Section;
-import de.unistuttgart.iste.gits.generated.dto.Stage;
+import de.unistuttgart.iste.gits.generated.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -138,14 +134,14 @@ class SectionServiceTest {
 
         // Mock the repository's behavior
         when(sectionRepository.findByChapterIdInOrderByPosition(dto.getChapterIds())).thenReturn(Collections.singletonList(sectionEntity));
-        doNothing().when(sectionRepository).deleteAllInBatch(any());
+        doNothing().when(sectionRepository).deleteAll(any());
 
         // Execute the method under test
         assertDoesNotThrow(() -> sectionService.cascadeSectionDeletion(dto));
 
         // Verify that the repository methods were called as expected
         verify(sectionRepository, times(1)).findByChapterIdInOrderByPosition(dto.getChapterIds());
-        verify(sectionRepository, times(1)).deleteAllInBatch(Collections.singletonList(sectionEntity));
+        verify(sectionRepository, times(1)).deleteAll(Collections.singletonList(sectionEntity));
     }
 
     @Test
